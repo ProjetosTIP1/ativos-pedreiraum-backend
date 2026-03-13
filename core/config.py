@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
@@ -9,9 +9,22 @@ class Settings(BaseSettings):
     )
 
     # Database
-    DATABASE_URL: str = Field(
-        default="postgresql+asyncpg://postgres:postgres@localhost:5432/valemix"
-    )
+    POSTGRES_USER: str = Field(default="postgres")
+    POSTGRES_PASSWORD: str = Field(default="postgres")
+    POSTGRES_DB: str = Field(default="valemix")
+    POSTGRES_HOST: str = Field(default="localhost")
+    POSTGRES_PORT: str = Field(default="5432")
+    
+    DATABASE_URL: Optional[str] = Field(default=None)
+
+    @property
+    def ASYNCPG_URL(self) -> str:
+        if self.DATABASE_URL:
+            # If a full URL is provided, ensure it's compatible with asyncpg
+            return self.DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
+        
+        # Construct from individual parts
+        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     # JWT
     SECRET_KEY: str = Field(default="your-super-secret-key-change-it-in-production")

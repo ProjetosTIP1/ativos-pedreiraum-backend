@@ -1,28 +1,31 @@
-import json
 from typing import List, Optional
 from uuid import UUID
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
-from domain.entities import Asset, AssetCategory
+import asyncpg
+from domain.entities import Asset
+from domain.enums import AssetCategory
 from domain.interfaces import IAssetRepository
+
+ASSET_COLUMNS = """
+    id, slug, name, category, subcategory, brand, model, year, 
+    serial_number, location, condition, status, price, description, 
+    main_image, gallery, is_featured, view_count, specifications, created_at
+"""
 
 
 class SQLAssetRepository(IAssetRepository):
-    def __init__(self, session: AsyncSession):
-        self.session = session
+    def __init__(self, connection: asyncpg.Connection):
+        self.connection = connection
 
     async def get_by_id(self, asset_id: UUID) -> Optional[Asset]:
-        query = text("SELECT * FROM assets WHERE id = :id")
-        result = await self.session.execute(query, {"id": asset_id})
-        row = result.mappings().first()
+        query = f"SELECT {ASSET_COLUMNS} FROM assets WHERE id = $1"
+        row = await self.connection.fetchrow(query, asset_id)
         if row:
             return Asset.model_validate(dict(row))
         return None
 
     async def get_by_slug(self, slug: str) -> Optional[Asset]:
-        query = text("SELECT * FROM assets WHERE slug = :slug")
-        result = await self.session.execute(query, {"slug": slug})
-        row = result.mappings().first()
+        query = f"SELECT {ASSET_COLUMNS} FROM assets WHERE slug = $1"
+        row = await self.connection.fetchrow(query, slug)
         if row:
             return Asset.model_validate(dict(row))
         return None
@@ -37,47 +40,52 @@ class SQLAssetRepository(IAssetRepository):
         limit: int = 20,
         offset: int = 0,
     ) -> List[Asset]:
-        sql = "SELECT * FROM assets WHERE 1=1"
-        params = {"limit": limit, "offset": offset}
+        sql = f"SELECT {ASSET_COLUMNS} FROM assets WHERE 1=1"
+        params = []
+        param_idx = 1
 
         if category:
-            sql += " AND category = :category"
-            params["category"] = category.value
+            sql += f" AND category = ${param_idx}"
+            params.append(category.value)
+            param_idx += 1
         if brand:
-            sql += " AND brand ILIKE :brand"
-            params["brand"] = f"%{brand}%"
+            sql += f" AND brand ILIKE ${param_idx}"
+            params.append(f"%{brand}%")
+            param_idx += 1
         if min_year:
-            sql += " AND year >= :min_year"
-            params["min_year"] = min_year
+            sql += f" AND year >= ${param_idx}"
+            params.append(min_year)
+            param_idx += 1
         if max_year:
-            sql += " AND year <= :max_year"
-            params["max_year"] = max_year
+            sql += f" AND year <= ${param_idx}"
+            params.append(max_year)
+            param_idx += 1
         if query:
-            sql += " AND search_vector @@ to_tsquery('portuguese', :query)"
-            params["query"] = " & ".join(query.split())
+            sql += f" AND search_vector @@ to_tsquery('portuguese', ${param_idx})"
+            params.append(" & ".join(query.split()))
+            param_idx += 1
 
-        sql += " ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+        sql += f" ORDER BY created_at DESC LIMIT ${param_idx} OFFSET ${param_idx + 1}"
+        params.extend([limit, offset])
 
-        result = await self.session.execute(text(sql), params)
-        return [Asset.model_validate(dict(row)) for row in result.mappings().all()]
+        rows = await self.connection.fetch(sql, *params)
+        return [Asset.model_validate(dict(row)) for row in rows]
 
     async def get_featured(self) -> List[Asset]:
-        query = text(
-            "SELECT * FROM assets WHERE is_featured = TRUE ORDER BY created_at DESC LIMIT 5"
-        )
-        result = await self.session.execute(query)
-        return [Asset.model_validate(dict(row)) for row in result.mappings().all()]
+        query = f"SELECT {ASSET_COLUMNS} FROM assets WHERE is_featured = TRUE ORDER BY created_at DESC LIMIT 5"
+        rows = await self.connection.fetch(query)
+        return [Asset.model_validate(dict(row)) for row in rows]
 
     async def create(self, asset: Asset) -> Asset:
-        asset_dict = json.loads(asset.model_dump_json(exclude={"created_at"}))
-
+        asset_dict = asset.model_dump(exclude={"created_at"})
+        # asyncpg handles UUID and other types directly, but specifications (dict) should be kept as dict
+        
         columns = ", ".join(asset_dict.keys())
-        placeholders = ", ".join([f":{k}" for k in asset_dict.keys()])
+        placeholders = ",埋".join([f"${i+1}" for i in range(len(asset_dict))])
+        values = list(asset_dict.values())
 
-        sql = f"INSERT INTO assets ({columns}) VALUES ({placeholders}) RETURNING *"
-        result = await self.session.execute(text(sql), asset_dict)
-        row = result.mappings().first()
-        await self.session.commit()
+        sql = f"INSERT INTO assets ({columns}) VALUES ({placeholders}) RETURNING {ASSET_COLUMNS}"
+        row = await self.connection.fetchrow(sql, *values)
         if not row:
             raise Exception("Failed to create asset")
         return Asset.model_validate(dict(row))
@@ -86,24 +94,31 @@ class SQLAssetRepository(IAssetRepository):
         if not asset_data:
             return await self.get_by_id(asset_id)
 
-        set_clause = ", ".join([f"{k} = :{k}" for k in asset_data.keys()])
-        params = {**asset_data, "id": asset_id}
+        # Remove keys that shouldn't be updated manually or are managed by DB
+        asset_data.pop("id", None)
+        asset_data.pop("created_at", None)
 
-        sql = f"UPDATE assets SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :id RETURNING *"
-        result = await self.session.execute(text(sql), params)
-        row = result.mappings().first()
-        await self.session.commit()
+        set_clauses = []
+        values = []
+        for i, (k, v) in enumerate(asset_data.items()):
+            set_clauses.append(f"{k} = ${i+1}")
+            values.append(v)
+        
+        idx = len(values) + 1
+        sql = f"UPDATE assets SET {', '.join(set_clauses)}, updated_at = CURRENT_TIMESTAMP WHERE id = ${idx} RETURNING {ASSET_COLUMNS}"
+        values.append(asset_id)
+        
+        row = await self.connection.fetchrow(sql, *values)
         if row:
             return Asset.model_validate(dict(row))
         return None
 
     async def delete(self, asset_id: UUID) -> bool:
-        query = text("DELETE FROM assets WHERE id = :id")
-        result = await self.session.execute(query, {"id": asset_id})
-        await self.session.commit()
-        return getattr(result, "rowcount", 0) > 0  # Use getattr for safety
+        query = "DELETE FROM assets WHERE id = $1"
+        result = await self.connection.execute(query, asset_id)
+        # result is a string like 'DELETE 1'
+        return result == "DELETE 1"
 
     async def increment_view_count(self, asset_id: UUID) -> None:
-        query = text("UPDATE assets SET view_count = view_count + 1 WHERE id = :id")
-        await self.session.execute(query, {"id": asset_id})
-        await self.session.commit()
+        query = "UPDATE assets SET view_count = view_count + 1 WHERE id = $1"
+        await self.connection.execute(query, asset_id)

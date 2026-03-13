@@ -1,6 +1,6 @@
 import logging
-from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+import asyncpg
+from typing import AsyncGenerator, Optional
 from .config import settings
 
 logger = logging.getLogger(__name__)
@@ -8,56 +8,76 @@ logger = logging.getLogger(__name__)
 
 class DatabaseManager:
     """
-    Singleton class to manage the database connection pool.
+    Singleton class to manage the asyncpg connection pool.
     """
 
-    _instance = None
+    _instance: Optional["DatabaseManager"] = None
+    _pool: Optional[asyncpg.Pool] = None
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(DatabaseManager, cls).__new__(cls)
-            cls._instance.engine = create_async_engine(
-                settings.DATABASE_URL,
-                echo=False,
-                pool_pre_ping=True,
-                pool_size=10,
-                max_overflow=20,
-            )
-            cls._instance.session_maker = async_sessionmaker(
-                cls._instance.engine, expire_on_commit=False, class_=AsyncSession
-            )
         return cls._instance
 
-    @property
-    def engine(self):
-        return self._engine
+    async def connect(self):
+        """Initializes the connection pool."""
+        if self._pool is None:
+            try:
+                self._pool = await asyncpg.create_pool(
+                    user=settings.POSTGRES_USER,
+                    password=settings.POSTGRES_PASSWORD,
+                    database=settings.POSTGRES_DB,
+                    host=settings.POSTGRES_HOST,
+                    port=settings.POSTGRES_PORT,
+                    min_size=5,
+                    max_size=20,
+                    max_queries=50000,
+                    max_inactive_connection_lifetime=300.0,
+                    timeout=30.0,
+                )
+                logger.info("Database connection pool created.")
+            except Exception as e:
+                logger.error(f"Failed to create database pool: {e}")
+                raise
 
-    @engine.setter
-    def engine(self, value):
-        self._engine = value
-
-    @property
-    def session_maker(self):
-        return self._session_maker
-
-    @session_maker.setter
-    def session_maker(self, value):
-        self._session_maker = value
-
-    async def close(self):
-        if self.engine:
-            await self.engine.dispose()
+    async def disconnect(self):
+        """Closes the connection pool."""
+        if self._pool is not None:
+            await self._pool.close()
+            self._pool = None
             logger.info("Database connection pool closed.")
 
+    async def get_connection(self) -> asyncpg.Connection:
+        """Returns a connection from the pool."""
+        if self._pool is None:
+            await self.connect()
+        
+        if self._pool is None:
+             raise Exception("Database pool is not initialized.")
+             
+        return self._pool.acquire()
 
-# Dependency to get a session
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
+
+# Dependency to get a connection from the pool
+async def get_db_connection() -> AsyncGenerator[asyncpg.Connection, None]:
+    """
+    FastAPI dependency to provide a database connection.
+    Ensures the connection is released back to the pool after use.
+    """
     db_manager = DatabaseManager()
-    async with db_manager.session_maker() as session:
+    
+    # Ensure pool is initialized (useful if first request hits here)
+    if db_manager._pool is None:
+        await db_manager.connect()
+
+    if db_manager._pool is None:
+        logger.error("Database pool could not be initialized.")
+        raise Exception("Database connectivity error.")
+
+    async with db_manager._pool.acquire() as connection:
         try:
-            yield session
-        except Exception:
-            await session.rollback()
+            yield connection
+        except Exception as e:
+            logger.error(f"Database connection error: {e}")
             raise
-        finally:
-            await session.close()
+        # async with automatically releases the connection back to the pool

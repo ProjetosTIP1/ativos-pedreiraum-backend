@@ -71,7 +71,7 @@ class Asset(BaseEntity):
     gallery: List[HttpUrl] = Field(default_factory=list)
     is_featured: bool = False
     view_count: int = 0
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.now)
 
     # Polymorphic specifications stored in JSONB
     specifications: Optional[dict] = None
