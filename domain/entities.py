@@ -66,6 +66,20 @@ class Branch(BaseEntity):
     contact_info: Optional[str] = None
 
 
+class ImageMetadata(BaseEntity):
+    id: UUID = Field(default_factory=uuid4)
+    asset_id: UUID
+    url: HttpUrl
+    name: str
+    alt_text: Optional[str] = None
+    content_type: Optional[str] = None
+    size: Optional[int] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
+    is_main: bool = False
+    created_at: datetime = Field(default_factory=datetime.now)
+
+
 class Asset(BaseEntity):
     id: UUID = Field(default_factory=uuid4)
     slug: str

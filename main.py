@@ -7,6 +7,7 @@ from api.v1.assets import router as asset_router
 from api.v1.categories import router as category_router
 from api.v1.admin_assets import router as admin_router
 from api.v1.auth import router as auth_router
+from api.v1.images import router as image_router
 
 
 @asynccontextmanager
@@ -40,6 +41,7 @@ app.include_router(asset_router, prefix="/api/v1")
 app.include_router(category_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
+app.include_router(image_router, prefix="/api/v1")
 
 
 @app.get("/")

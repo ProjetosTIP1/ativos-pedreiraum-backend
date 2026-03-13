@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 from uuid import UUID
-from .entities import Asset, Category, AppConfig, User, Branch
+from .entities import Asset, Category, AppConfig, User, Branch, ImageMetadata
 from .enums import AssetCategory, AssetStatus
 
 
@@ -115,4 +115,32 @@ class IConfigRepository(ABC):
 
     @abstractmethod
     async def update_config(self, config: AppConfig) -> AppConfig:
+        pass
+
+
+class IImageRepository(ABC):
+    @abstractmethod
+    async def get_by_id(self, image_id: UUID) -> Optional[ImageMetadata]:
+        pass
+
+    @abstractmethod
+    async def list_by_asset(self, asset_id: UUID) -> List[ImageMetadata]:
+        pass
+
+    @abstractmethod
+    async def create(self, image: ImageMetadata) -> ImageMetadata:
+        pass
+
+    @abstractmethod
+    async def update(
+        self, image_id: UUID, image_data: dict
+    ) -> Optional[ImageMetadata]:
+        pass
+
+    @abstractmethod
+    async def delete(self, image_id: UUID) -> bool:
+        pass
+
+    @abstractmethod
+    async def set_main_image(self, asset_id: UUID, image_id: UUID) -> bool:
         pass

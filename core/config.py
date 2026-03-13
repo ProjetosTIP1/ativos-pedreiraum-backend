@@ -19,12 +19,15 @@ class Settings(BaseSettings):
 
     @property
     def ASYNCPG_URL(self) -> str:
+        from urllib.parse import quote_plus
+        
         if self.DATABASE_URL:
             # If a full URL is provided, ensure it's compatible with asyncpg
             return self.DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
-
-        # Construct from individual parts
-        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        
+        # Construct from individual parts with encoded password
+        encoded_password = quote_plus(self.POSTGRES_PASSWORD)
+        return f"postgresql://{self.POSTGRES_USER}:{encoded_password}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     # JWT
     SECRET_KEY: str = Field(default="your-super-secret-key-change-it-in-production")
