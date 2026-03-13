@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 from uuid import UUID
-from .entities import Asset, Category, AppConfig
-from .enums import AssetCategory
+from .entities import Asset, Category, AppConfig, User, Branch
+from .enums import AssetCategory, AssetStatus
 
 
 class IAssetRepository(ABC):
@@ -21,6 +21,8 @@ class IAssetRepository(ABC):
         brand: Optional[str] = None,
         min_year: Optional[int] = None,
         max_year: Optional[int] = None,
+        branch_id: Optional[int] = None,
+        status: Optional[AssetStatus] = None,
         query: Optional[str] = None,
         limit: int = 20,
         offset: int = 0,
@@ -55,6 +57,54 @@ class ICategoryRepository(ABC):
 
     @abstractmethod
     async def get_by_id(self, category_id: int) -> Optional[Category]:
+        pass
+
+
+class IUserRepository(ABC):
+    @abstractmethod
+    async def get_by_id(self, user_id: UUID) -> Optional[User]:
+        pass
+
+    @abstractmethod
+    async def get_by_email(self, email: str) -> Optional[User]:
+        pass
+
+    @abstractmethod
+    async def list_all(self) -> List[User]:
+        pass
+
+    @abstractmethod
+    async def create(self, user: User) -> User:
+        pass
+
+    @abstractmethod
+    async def update(self, user_id: UUID, user_data: dict) -> Optional[User]:
+        pass
+
+    @abstractmethod
+    async def delete(self, user_id: UUID) -> bool:
+        pass
+
+
+class IBranchRepository(ABC):
+    @abstractmethod
+    async def get_by_id(self, branch_id: int) -> Optional[Branch]:
+        pass
+
+    @abstractmethod
+    async def list_all(self) -> List[Branch]:
+        pass
+
+    @abstractmethod
+    async def create(self, branch: Branch) -> Branch:
+        pass
+
+    @abstractmethod
+    async def update(self, branch_id: int, branch_data: dict) -> Optional[Branch]:
+        pass
+
+    @abstractmethod
+    async def delete(self, branch_id: int) -> bool:
         pass
 
 

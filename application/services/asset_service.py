@@ -2,6 +2,7 @@ import re
 from typing import List, Optional
 from uuid import UUID
 from domain.entities import Asset
+from domain.enums import AssetStatus
 from domain.interfaces import IAssetRepository, ICategoryRepository
 
 
@@ -24,7 +25,7 @@ class AssetService:
     async def get_featured_assets(self) -> List[Asset]:
         return await self.asset_repo.get_featured()
 
-    async def create_asset(self, asset_data: dict) -> Asset:
+    async def create_asset(self, asset_data: dict, user_id: Optional[UUID] = None) -> Asset:
         # Generate slug: name + year
         name = asset_data.get("name", "")
         year = asset_data.get("year", "")
@@ -32,8 +33,12 @@ class AssetService:
         slug = self._generate_slug(slug_base)
 
         asset_data["slug"] = slug
-        asset = Asset.model_validate(asset_data)
+        asset_data["created_by_user_id"] = user_id
+        
+        # Ensure status is PENDING for new assets created by users
+        asset_data["status"] = AssetStatus.PENDING
 
+        asset = Asset.model_validate(asset_data)
         return await self.asset_repo.create(asset)
 
     async def update_asset(self, asset_id: UUID, asset_data: dict) -> Optional[Asset]:

@@ -2,9 +2,16 @@ from enum import Enum
 
 
 class AssetStatus(str, Enum):
+    PENDING = "PENDING"
     AVAILABLE = "AVAILABLE"
     RESERVED = "RESERVED"
     SOLD = "SOLD"
+    REJECTED = "REJECTED"
+
+
+class UserRole(str, Enum):
+    ADMIN = "ADMIN"
+    REGULAR = "REGULAR"
 
 
 class AssetCondition(str, Enum):

@@ -2,13 +2,14 @@ from typing import List, Optional
 from uuid import UUID
 import asyncpg
 from domain.entities import Asset
-from domain.enums import AssetCategory
+from domain.enums import AssetCategory, AssetStatus
 from domain.interfaces import IAssetRepository
 
 ASSET_COLUMNS = """
     id, slug, name, category, subcategory, brand, model, year, 
     serial_number, location, condition, status, price, description, 
-    main_image, gallery, is_featured, view_count, specifications, created_at
+    main_image, gallery, is_featured, view_count, branch_id, 
+    created_by_user_id, specifications, created_at
 """
 
 
@@ -36,6 +37,8 @@ class SQLAssetRepository(IAssetRepository):
         brand: Optional[str] = None,
         min_year: Optional[int] = None,
         max_year: Optional[int] = None,
+        branch_id: Optional[int] = None,
+        status: Optional[AssetStatus] = None,
         query: Optional[str] = None,
         limit: int = 20,
         offset: int = 0,
@@ -60,6 +63,14 @@ class SQLAssetRepository(IAssetRepository):
             sql += f" AND year <= ${param_idx}"
             params.append(max_year)
             param_idx += 1
+        if branch_id:
+            sql += f" AND branch_id = ${param_idx}"
+            params.append(branch_id)
+            param_idx += 1
+        if status:
+            sql += f" AND status = ${param_idx}"
+            params.append(status.value)
+            param_idx += 1
         if query:
             sql += f" AND search_vector @@ to_tsquery('portuguese', ${param_idx})"
             params.append(" & ".join(query.split()))
@@ -72,16 +83,29 @@ class SQLAssetRepository(IAssetRepository):
         return [Asset.model_validate(dict(row)) for row in rows]
 
     async def get_featured(self) -> List[Asset]:
-        query = f"SELECT {ASSET_COLUMNS} FROM assets WHERE is_featured = TRUE ORDER BY created_at DESC LIMIT 5"
+        query = f"SELECT {ASSET_COLUMNS} FROM assets WHERE is_featured = TRUE AND status = 'AVAILABLE' ORDER BY created_at DESC LIMIT 5"
         rows = await self.connection.fetch(query)
         return [Asset.model_validate(dict(row)) for row in rows]
 
     async def create(self, asset: Asset) -> Asset:
         asset_dict = asset.model_dump(exclude={"created_at"})
-        # asyncpg handles UUID and other types directly, but specifications (dict) should be kept as dict
         
+        # Convert Pydantic types to basic ones that asyncpg understands
+        for key, value in asset_dict.items():
+            if key == "specifications" and isinstance(value, dict):
+                import json
+                asset_dict[key] = json.dumps(value)
+            elif key == "gallery" and isinstance(value, list):
+                # Ensure all elements are strings for TEXT[]
+                asset_dict[key] = [str(v) for v in value]
+            elif hasattr(value, "value") and not isinstance(value, str): # Enums
+                asset_dict[key] = value.value
+            elif hasattr(value, "__str__") and "HttpUrl" in str(type(value)):
+                asset_dict[key] = str(value)
+
         columns = ", ".join(asset_dict.keys())
-        placeholders = ",埋".join([f"${i+1}" for i in range(len(asset_dict))])
+        # Use $1, $2, etc. placeholders
+        placeholders = ", ".join([f"${i+1}" for i in range(len(asset_dict))])
         values = list(asset_dict.values())
 
         sql = f"INSERT INTO assets ({columns}) VALUES ({placeholders}) RETURNING {ASSET_COLUMNS}"
@@ -94,7 +118,6 @@ class SQLAssetRepository(IAssetRepository):
         if not asset_data:
             return await self.get_by_id(asset_id)
 
-        # Remove keys that shouldn't be updated manually or are managed by DB
         asset_data.pop("id", None)
         asset_data.pop("created_at", None)
 

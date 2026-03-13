@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional, Union, Annotated
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field, HttpUrl, ConfigDict, field_validator
-from .enums import AssetStatus, AssetCondition, AssetCategory, PartState
+from .enums import AssetStatus, AssetCondition, AssetCategory, PartState, UserRole
 
 
 class BaseEntity(BaseModel):
@@ -46,10 +46,24 @@ class PartSpecs(BaseEntity):
 # Union of all possible specifications
 AssetSpecs = Annotated[
     Union[TruckSpecs, ExcavatorSpecs, GraderSpecs, IndustrialSpecs, PartSpecs],
-    Field(
-        discriminator="category"
-    ),  # This will be handled in a factory or custom validator
+    Field(discriminator="category"),
 ]
+
+
+class User(BaseEntity):
+    id: UUID = Field(default_factory=uuid4)
+    email: str
+    full_name: str
+    role: UserRole = UserRole.REGULAR
+    hashed_password: str
+    created_at: datetime = Field(default_factory=datetime.now)
+
+
+class Branch(BaseEntity):
+    id: int
+    name: str
+    location: str
+    contact_info: Optional[str] = None
 
 
 class Asset(BaseEntity):
@@ -64,17 +78,47 @@ class Asset(BaseEntity):
     serial_number: str
     location: str
     condition: AssetCondition
-    status: AssetStatus
+    status: AssetStatus = AssetStatus.PENDING
     price: Optional[float] = None
     description: str
     main_image: HttpUrl
     gallery: List[HttpUrl] = Field(default_factory=list)
     is_featured: bool = False
     view_count: int = 0
+    branch_id: int
+    created_by_user_id: Optional[UUID] = None
     created_at: datetime = Field(default_factory=datetime.now)
 
     # Polymorphic specifications stored in JSONB
     specifications: Optional[dict] = None
+
+    @field_validator("specifications", mode="before")
+    @classmethod
+    def validate_specifications(cls, v):
+        if isinstance(v, str):
+            import json
+            try:
+                 return json.loads(v)
+            except json.JSONDecodeError:
+                 return {}
+        return v or {}
+
+    @field_validator("gallery", mode="before")
+    @classmethod
+    def validate_gallery(cls, v):
+        if isinstance(v, str):
+            # Handle possible string representation of postgres array or JSON
+            if v.startswith("{") and v.endswith("}"):
+                 v = v[1:-1].split(",")
+            else:
+                 import json
+                 try:
+                      v = json.loads(v)
+                 except json.JSONDecodeError:
+                      return []
+        if isinstance(v, list):
+            return [str(url).strip('"') for url in v if url]
+        return []
 
     @field_validator("slug")
     @classmethod
