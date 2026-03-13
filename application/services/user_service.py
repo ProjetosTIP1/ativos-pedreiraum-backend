@@ -38,6 +38,14 @@ class UserService:
     async def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         return pwd_context.verify(plain_password, hashed_password)
 
+    async def authenticate_user(self, email: str, password: str) -> Optional[User]:
+        user = await self.user_repo.get_by_email(email)
+        if not user:
+            return None
+        if not await self.verify_password(password, user.hashed_password):
+            return None
+        return user
+
     async def update_user(self, user_id: UUID, user_data: dict) -> Optional[User]:
         if "password" in user_data:
             password = user_data.pop("password")

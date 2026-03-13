@@ -1,20 +1,21 @@
+import asyncpg
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-from core.database import get_session
+from core.database import get_db_connection
 from infrastructure.repositories.asset_repository import SQLAssetRepository
 from infrastructure.repositories.category_repository import SQLCategoryRepository
 from application.services.asset_service import AssetService
-from domain.entities import Asset, AssetCategory
+from domain.entities import Asset
+from domain.enums import AssetCategory
 
 router = APIRouter(prefix="/assets", tags=["Assets"])
 
 
 async def get_asset_service(
-    session: AsyncSession = Depends(get_session),
+    conn: asyncpg.Connection = Depends(get_db_connection),
 ) -> AssetService:
-    asset_repo = SQLAssetRepository(session)
-    category_repo = SQLCategoryRepository(session)
+    asset_repo = SQLAssetRepository(conn)
+    category_repo = SQLCategoryRepository(conn)
     return AssetService(asset_repo, category_repo)
 
 
@@ -34,7 +35,7 @@ async def list_assets(
         brand=brand,
         min_year=min_year,
         max_year=max_year,
-        query_text=q,
+        query=q,
         limit=limit,
         offset=offset,
     )

@@ -1,13 +1,26 @@
+import asyncpg
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
+from fastapi.security import OAuth2PasswordRequestForm
 from core.config import settings
+from core.database import get_db_connection
+from infrastructure.repositories.user_repository import SQLUserRepository
+from application.services.user_service import UserService
+from domain.entities import User
+from domain.enums import UserRole
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
+router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+COOKIE_NAME = "access_token"
+
+
+async def get_user_service(
+    conn: asyncpg.Connection = Depends(get_db_connection),
+) -> UserService:
+    repo = SQLUserRepository(conn)
+    return UserService(repo)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -15,7 +28,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(
         to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
@@ -23,31 +36,81 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+@router.post("/login")
+async def login(
+    response: Response,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    user_service: UserService = Depends(get_user_service),
+):
+    user = await user_service.authenticate_user(form_data.username, form_data.password)
+    # Note: OAuth2PasswordRequestForm uses 'username' field for email in our case
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    access_token = create_access_token(data={"sub": user.email})
+    
+    # Set HTTP-only cookie
+    response.set_cookie(
+        key=COOKIE_NAME,
+        value=access_token,
+        httponly=True,
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        expires=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        samesite="lax",
+        secure=False,  # Set to True in production with HTTPS
+    )
+    
+    return {"message": "Logged in successfully", "user": user}
+
+
+@router.post("/logout")
+async def logout(response: Response):
+    response.delete_cookie(COOKIE_NAME)
+    return {"message": "Logged out successfully"}
+
+
+async def get_current_user(
+    request: Request,
+    user_service: UserService = Depends(get_user_service),
+) -> User:
+    token = request.cookies.get(COOKIE_NAME)
+    
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    
+    if not token:
+        raise credentials_exception
+
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
-        username: str = payload.get("sub")
-        if username is None:
+        email: str = payload.get("sub")
+        if email is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
-    if username != "admin":  # Simplified for single admin
+    user = await user_service.get_user_by_email(email)
+    if user is None:
         raise credentials_exception
 
-    return username
+    return user
 
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
+async def get_current_admin(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The user does not have enough privileges",
+        )
+    return current_user
