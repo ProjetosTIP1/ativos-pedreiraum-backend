@@ -97,10 +97,11 @@ class Asset(BaseEntity):
     def validate_specifications(cls, v):
         if isinstance(v, str):
             import json
+
             try:
-                 return json.loads(v)
+                return json.loads(v)
             except json.JSONDecodeError:
-                 return {}
+                return {}
         return v or {}
 
     @field_validator("gallery", mode="before")
@@ -109,13 +110,14 @@ class Asset(BaseEntity):
         if isinstance(v, str):
             # Handle possible string representation of postgres array or JSON
             if v.startswith("{") and v.endswith("}"):
-                 v = v[1:-1].split(",")
+                v = v[1:-1].split(",")
             else:
-                 import json
-                 try:
-                      v = json.loads(v)
-                 except json.JSONDecodeError:
-                      return []
+                import json
+
+                try:
+                    v = json.loads(v)
+                except json.JSONDecodeError:
+                    return []
         if isinstance(v, list):
             return [str(url).strip('"') for url in v if url]
         return []

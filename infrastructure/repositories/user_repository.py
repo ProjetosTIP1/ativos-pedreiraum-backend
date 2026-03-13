@@ -33,7 +33,7 @@ class SQLUserRepository(IUserRepository):
     async def create(self, user: User) -> User:
         user_dict = user.model_dump(exclude={"created_at"})
         columns = ", ".join(user_dict.keys())
-        placeholders = ", ".join([f"${i+1}" for i in range(len(user_dict))])
+        placeholders = ", ".join([f"${i + 1}" for i in range(len(user_dict))])
         values = list(user_dict.values())
 
         sql = f"INSERT INTO users ({columns}) VALUES ({placeholders}) RETURNING {USER_COLUMNS}"
@@ -49,9 +49,9 @@ class SQLUserRepository(IUserRepository):
         user_data.pop("id", None)
         user_data.pop("created_at", None)
 
-        set_clauses = [f"{k} = ${i+1}" for i, k in enumerate(user_data.keys())]
+        set_clauses = [f"{k} = ${i + 1}" for i, k in enumerate(user_data.keys())]
         values = list(user_data.values())
-        
+
         idx = len(values) + 1
         sql = f"UPDATE users SET {', '.join(set_clauses)} WHERE id = ${idx} RETURNING {USER_COLUMNS}"
         values.append(user_id)

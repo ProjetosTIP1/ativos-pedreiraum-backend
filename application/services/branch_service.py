@@ -17,7 +17,9 @@ class BranchService:
     async def list_branches(self) -> List[Branch]:
         return await self.branch_repo.list_all()
 
-    async def update_branch(self, branch_id: int, branch_data: dict) -> Optional[Branch]:
+    async def update_branch(
+        self, branch_id: int, branch_data: dict
+    ) -> Optional[Branch]:
         return await self.branch_repo.update(branch_id, branch_data)
 
     async def delete_branch(self, branch_id: int) -> bool:

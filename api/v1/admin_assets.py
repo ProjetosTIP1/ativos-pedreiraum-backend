@@ -1,6 +1,5 @@
 import asyncpg
 from uuid import UUID
-from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from api.v1.auth import get_current_admin
 from api.v1.assets import get_asset_service

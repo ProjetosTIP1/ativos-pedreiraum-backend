@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = Field(default="valemix")
     POSTGRES_HOST: str = Field(default="localhost")
     POSTGRES_PORT: str = Field(default="5432")
-    
+
     DATABASE_URL: Optional[str] = Field(default=None)
 
     @property
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
         if self.DATABASE_URL:
             # If a full URL is provided, ensure it's compatible with asyncpg
             return self.DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
-        
+
         # Construct from individual parts
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 

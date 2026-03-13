@@ -25,7 +25,9 @@ class AssetService:
     async def get_featured_assets(self) -> List[Asset]:
         return await self.asset_repo.get_featured()
 
-    async def create_asset(self, asset_data: dict, user_id: Optional[UUID] = None) -> Asset:
+    async def create_asset(
+        self, asset_data: dict, user_id: Optional[UUID] = None
+    ) -> Asset:
         # Generate slug: name + year
         name = asset_data.get("name", "")
         year = asset_data.get("year", "")
@@ -34,7 +36,7 @@ class AssetService:
 
         asset_data["slug"] = slug
         asset_data["created_by_user_id"] = user_id
-        
+
         # Ensure status is PENDING for new assets created by users
         asset_data["status"] = AssetStatus.PENDING
 

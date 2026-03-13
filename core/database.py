@@ -51,10 +51,10 @@ class DatabaseManager:
         """Returns a connection from the pool."""
         if self._pool is None:
             await self.connect()
-        
+
         if self._pool is None:
-             raise Exception("Database pool is not initialized.")
-             
+            raise Exception("Database pool is not initialized.")
+
         return self._pool.acquire()
 
 
@@ -65,7 +65,7 @@ async def get_db_connection() -> AsyncGenerator[asyncpg.Connection, None]:
     Ensures the connection is released back to the pool after use.
     """
     db_manager = DatabaseManager()
-    
+
     # Ensure pool is initialized (useful if first request hits here)
     if db_manager._pool is None:
         await db_manager.connect()

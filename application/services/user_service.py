@@ -3,7 +3,6 @@ from uuid import UUID
 from passlib.context import CryptContext
 from domain.entities import User
 from domain.interfaces import IUserRepository
-from domain.enums import UserRole
 
 # Password hashing configuration
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
@@ -50,7 +49,7 @@ class UserService:
         if "password" in user_data:
             password = user_data.pop("password")
             user_data["hashed_password"] = pwd_context.hash(password)
-        
+
         return await self.user_repo.update(user_id, user_data)
 
     async def delete_user(self, user_id: UUID) -> bool:

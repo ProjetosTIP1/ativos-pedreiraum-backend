@@ -12,13 +12,13 @@ class SQLConfigRepository(IConfigRepository):
     async def get_config(self) -> AppConfig:
         query = f"SELECT {CONFIG_COLUMNS} FROM app_configs"
         rows = await self.connection.fetch(query)
-        
+
         config_dict = {row["key"]: row["value"] for row in rows}
         return AppConfig.model_validate(config_dict)
 
     async def update_config(self, config: AppConfig) -> AppConfig:
         config_data = config.model_dump()
-        
+
         # We use UPSERT for each config key
         for key, value in config_data.items():
             query = """
@@ -27,5 +27,5 @@ class SQLConfigRepository(IConfigRepository):
                 ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = CURRENT_TIMESTAMP
             """
             await self.connection.execute(query, key, str(value))
-            
+
         return config

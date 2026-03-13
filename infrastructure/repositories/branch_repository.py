@@ -25,7 +25,7 @@ class SQLBranchRepository(IBranchRepository):
     async def create(self, branch: Branch) -> Branch:
         branch_dict = branch.model_dump(exclude={"id"})
         columns = ", ".join(branch_dict.keys())
-        placeholders = ",埋".join([f"${i+1}" for i in range(len(branch_dict))])
+        placeholders = ",埋".join([f"${i + 1}" for i in range(len(branch_dict))])
         values = list(branch_dict.values())
 
         sql = f"INSERT INTO branches ({columns}) VALUES ({placeholders}) RETURNING {BRANCH_COLUMNS}"
@@ -39,9 +39,9 @@ class SQLBranchRepository(IBranchRepository):
             return await self.get_by_id(branch_id)
 
         branch_data.pop("id", None)
-        set_clauses = [f"{k} = ${i+1}" for i, k in enumerate(branch_data.keys())]
+        set_clauses = [f"{k} = ${i + 1}" for i, k in enumerate(branch_data.keys())]
         values = list(branch_data.values())
-        
+
         idx = len(values) + 1
         sql = f"UPDATE branches SET {', '.join(set_clauses)} WHERE id = ${idx} RETURNING {BRANCH_COLUMNS}"
         values.append(branch_id)

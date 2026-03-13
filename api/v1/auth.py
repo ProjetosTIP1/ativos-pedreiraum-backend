@@ -28,7 +28,9 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(
         to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
@@ -52,7 +54,7 @@ async def login(
         )
 
     access_token = create_access_token(data={"sub": user.email})
-    
+
     # Set HTTP-only cookie
     response.set_cookie(
         key=COOKIE_NAME,
@@ -63,7 +65,7 @@ async def login(
         samesite="lax",
         secure=False,  # Set to True in production with HTTPS
     )
-    
+
     return {"message": "Logged in successfully", "user": user}
 
 
@@ -78,13 +80,13 @@ async def get_current_user(
     user_service: UserService = Depends(get_user_service),
 ) -> User:
     token = request.cookies.get(COOKIE_NAME)
-    
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     if not token:
         raise credentials_exception
 

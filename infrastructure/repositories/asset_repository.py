@@ -89,23 +89,24 @@ class SQLAssetRepository(IAssetRepository):
 
     async def create(self, asset: Asset) -> Asset:
         asset_dict = asset.model_dump(exclude={"created_at"})
-        
+
         # Convert Pydantic types to basic ones that asyncpg understands
         for key, value in asset_dict.items():
             if key == "specifications" and isinstance(value, dict):
                 import json
+
                 asset_dict[key] = json.dumps(value)
             elif key == "gallery" and isinstance(value, list):
                 # Ensure all elements are strings for TEXT[]
                 asset_dict[key] = [str(v) for v in value]
-            elif hasattr(value, "value") and not isinstance(value, str): # Enums
+            elif hasattr(value, "value") and not isinstance(value, str):  # Enums
                 asset_dict[key] = value.value
             elif hasattr(value, "__str__") and "HttpUrl" in str(type(value)):
                 asset_dict[key] = str(value)
 
         columns = ", ".join(asset_dict.keys())
         # Use $1, $2, etc. placeholders
-        placeholders = ", ".join([f"${i+1}" for i in range(len(asset_dict))])
+        placeholders = ", ".join([f"${i + 1}" for i in range(len(asset_dict))])
         values = list(asset_dict.values())
 
         sql = f"INSERT INTO assets ({columns}) VALUES ({placeholders}) RETURNING {ASSET_COLUMNS}"
@@ -124,13 +125,13 @@ class SQLAssetRepository(IAssetRepository):
         set_clauses = []
         values = []
         for i, (k, v) in enumerate(asset_data.items()):
-            set_clauses.append(f"{k} = ${i+1}")
+            set_clauses.append(f"{k} = ${i + 1}")
             values.append(v)
-        
+
         idx = len(values) + 1
         sql = f"UPDATE assets SET {', '.join(set_clauses)}, updated_at = CURRENT_TIMESTAMP WHERE id = ${idx} RETURNING {ASSET_COLUMNS}"
         values.append(asset_id)
-        
+
         row = await self.connection.fetchrow(sql, *values)
         if row:
             return Asset.model_validate(dict(row))
