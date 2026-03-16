@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from jose import JWTError, jwt
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
-from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel, EmailStr
 from core.config import settings
 from core.database import get_db_connection
 from infrastructure.repositories.user_repository import SQLUserRepository
@@ -11,6 +11,11 @@ from application.services.user_service import UserService
 from domain.entities import User
 from domain.enums import UserRole
 from core.helpers.exceptions_helper import ServiceException, to_http_exception
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -42,12 +47,11 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 @router.post("/login")
 async def login(
     response: Response,
-    form_data: OAuth2PasswordRequestForm = Depends(),
+    body: LoginRequest,
     user_service: UserService = Depends(get_user_service),
 ):
     try:
-        user = await user_service.authenticate_user(form_data.username, form_data.password)
-        # Note: OAuth2PasswordRequestForm uses 'username' field for email in our case
+        user = await user_service.authenticate_user(body.email, body.password)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
