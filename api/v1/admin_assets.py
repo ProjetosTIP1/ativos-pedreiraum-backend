@@ -28,8 +28,12 @@ async def create_asset(
     try:
         # Admin can create assets directly, we set user_id for tracking
         return await service.create_asset(asset_data, user_id=current_user.id)
-    except Exception as e:
+    except HTTPException:
+        raise
+    except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/{asset_id}/approve", response_model=Asset)
@@ -44,8 +48,12 @@ async def approve_asset(
         if not asset:
             raise HTTPException(status_code=404, detail="Asset not found")
         return asset
+    except HTTPException:
+        raise
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/{asset_id}/reject", response_model=Asset)
@@ -59,8 +67,12 @@ async def reject_asset(
         if not asset:
             raise HTTPException(status_code=404, detail="Asset not found")
         return asset
+    except HTTPException:
+        raise
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.patch("/{asset_id}", response_model=Asset)
@@ -70,10 +82,17 @@ async def update_asset(
     _current_admin: User = Depends(get_current_admin),
     service: AssetService = Depends(get_asset_service),
 ):
-    asset = await service.update_asset(asset_id, asset_data)
-    if not asset:
-        raise HTTPException(status_code=404, detail="Asset not found")
-    return asset
+    try:
+        asset = await service.update_asset(asset_id, asset_data)
+        if not asset:
+            raise HTTPException(status_code=404, detail="Asset not found")
+        return asset
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.delete("/{asset_id}")
@@ -87,5 +106,9 @@ async def delete_asset(
         if not success:
             raise HTTPException(status_code=404, detail="Asset not found")
         return {"message": "Asset deleted successfully"}
+    except HTTPException:
+        raise
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")

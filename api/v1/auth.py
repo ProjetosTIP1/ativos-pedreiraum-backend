@@ -44,35 +44,49 @@ async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     user_service: UserService = Depends(get_user_service),
 ):
-    user = await user_service.authenticate_user(form_data.username, form_data.password)
-    # Note: OAuth2PasswordRequestForm uses 'username' field for email in our case
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
+    try:
+        user = await user_service.authenticate_user(form_data.username, form_data.password)
+        # Note: OAuth2PasswordRequestForm uses 'username' field for email in our case
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect email or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        access_token = create_access_token(data={"sub": user.email})
+
+        # Set HTTP-only cookie
+        response.set_cookie(
+            key=COOKIE_NAME,
+            value=access_token,
+            httponly=True,
+            max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            expires=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            samesite="lax",
+            secure=False,  # Set to True in production with HTTPS
         )
 
-    access_token = create_access_token(data={"sub": user.email})
-
-    # Set HTTP-only cookie
-    response.set_cookie(
-        key=COOKIE_NAME,
-        value=access_token,
-        httponly=True,
-        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        expires=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        samesite="lax",
-        secure=False,  # Set to True in production with HTTPS
-    )
-
-    return {"message": "Logged in successfully", "user": user}
+        return {"message": "Logged in successfully", "user": user}
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/logout")
 async def logout(response: Response):
-    response.delete_cookie(COOKIE_NAME)
-    return {"message": "Logged out successfully"}
+    try:
+        response.delete_cookie(COOKIE_NAME)
+        return {"message": "Logged out successfully"}
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 async def get_current_user(

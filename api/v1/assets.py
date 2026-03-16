@@ -30,25 +30,46 @@ async def list_assets(
     offset: int = Query(0, ge=0),
     service: AssetService = Depends(get_asset_service),
 ):
-    return await service.get_all_assets(
-        category=category,
-        brand=brand,
-        min_year=min_year,
-        max_year=max_year,
-        query=q,
-        limit=limit,
-        offset=offset,
-    )
+    try:
+        return await service.get_all_assets(
+            category=category,
+            brand=brand,
+            min_year=min_year,
+            max_year=max_year,
+            query=q,
+            limit=limit,
+            offset=offset,
+        )
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/highlights", response_model=List[Asset])
 async def get_highlights(service: AssetService = Depends(get_asset_service)):
-    return await service.get_featured_assets()
+    try:
+        return await service.get_featured_assets()
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/{slug}", response_model=Asset)
 async def get_asset(slug: str, service: AssetService = Depends(get_asset_service)):
-    asset = await service.get_asset_by_slug(slug)
-    if not asset:
-        raise HTTPException(status_code=404, detail="Asset not found")
-    return asset
+    try:
+        asset = await service.get_asset_by_slug(slug)
+        if not asset:
+            raise HTTPException(status_code=404, detail="Asset not found")
+        return asset
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")

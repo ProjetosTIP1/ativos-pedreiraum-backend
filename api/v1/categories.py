@@ -1,6 +1,6 @@
 import asyncpg
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from core.database import get_db_connection
 from infrastructure.repositories.category_repository import SQLCategoryRepository
 from application.services.category_service import CategoryService
@@ -18,4 +18,11 @@ async def get_category_service(
 
 @router.get("/", response_model=List[Category])
 async def list_categories(service: CategoryService = Depends(get_category_service)):
-    return await service.get_all_categories()
+    try:
+        return await service.get_all_categories()
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")

@@ -40,8 +40,10 @@ async def add_image(
         )
     except HTTPException:
         raise
-    except Exception as e:
+    except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/asset/{asset_id}", response_model=List[ImageMetadata])
@@ -49,7 +51,14 @@ async def get_asset_images(
     asset_id: UUID, 
     service: ImageService = Depends(get_image_service)
 ):
-    return await service.get_asset_images(asset_id)
+    try:
+        return await service.get_asset_images(asset_id)
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/{image_id}/set-main")
@@ -59,10 +68,17 @@ async def set_main_image(
     current_user: User = Depends(get_current_user),
     service: ImageService = Depends(get_image_service),
 ):
-    success = await service.set_main_image(asset_id, image_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Image or Asset not found")
-    return {"message": "Main image updated successfully"}
+    try:
+        success = await service.set_main_image(asset_id, image_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Image or Asset not found")
+        return {"message": "Main image updated successfully"}
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.delete("/{image_id}")
@@ -71,10 +87,17 @@ async def delete_image(
     current_user: User = Depends(get_current_user),
     service: ImageService = Depends(get_image_service),
 ):
-    success = await service.delete_image(image_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Image not found")
-    return {"message": "Image and metadata deleted successfully"}
+    try:
+        success = await service.delete_image(image_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Image not found")
+        return {"message": "Image and metadata deleted successfully"}
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.patch("/{image_id}", response_model=ImageMetadata)
@@ -84,7 +107,14 @@ async def update_image_metadata(
     current_user: User = Depends(get_current_user),
     service: ImageService = Depends(get_image_service),
 ):
-    updated = await service.update_metadata(image_id, metadata)
-    if not updated:
-        raise HTTPException(status_code=404, detail="Image not found")
-    return updated
+    try:
+        updated = await service.update_metadata(image_id, metadata)
+        if not updated:
+            raise HTTPException(status_code=404, detail="Image not found")
+        return updated
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
