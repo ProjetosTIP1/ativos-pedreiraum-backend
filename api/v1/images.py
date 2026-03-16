@@ -7,6 +7,7 @@ from infrastructure.repositories.image_repository import SQLImageRepository
 from application.services.image_service import ImageService
 from domain.entities import ImageMetadata, User
 from api.v1.auth import get_current_user
+from core.helpers.exceptions_helper import ServiceException, to_http_exception
 
 router = APIRouter(prefix="/images", tags=["Images"])
 
@@ -40,6 +41,8 @@ async def add_image(
         )
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
@@ -55,6 +58,8 @@ async def get_asset_images(
         return await service.get_asset_images(asset_id)
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
@@ -75,6 +80,8 @@ async def set_main_image(
         return {"message": "Main image updated successfully"}
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
@@ -94,6 +101,8 @@ async def delete_image(
         return {"message": "Image and metadata deleted successfully"}
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
@@ -114,6 +123,8 @@ async def update_image_metadata(
         return updated
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:

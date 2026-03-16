@@ -10,6 +10,7 @@ from infrastructure.repositories.user_repository import SQLUserRepository
 from application.services.user_service import UserService
 from domain.entities import User
 from domain.enums import UserRole
+from core.helpers.exceptions_helper import ServiceException, to_http_exception
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -70,6 +71,8 @@ async def login(
         return {"message": "Logged in successfully", "user": user}
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
@@ -83,6 +86,8 @@ async def logout(response: Response):
         return {"message": "Logged out successfully"}
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:

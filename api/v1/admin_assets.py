@@ -8,6 +8,7 @@ from infrastructure.repositories.asset_repository import SQLAssetRepository
 from application.services.asset_service import AssetService
 from application.services.asset_approval_service import AssetApprovalService
 from domain.entities import Asset, User
+from core.helpers.exceptions_helper import ServiceException, to_http_exception
 
 router = APIRouter(prefix="/admin/assets", tags=["Admin Assets"])
 
@@ -30,6 +31,8 @@ async def create_asset(
         return await service.create_asset(asset_data, user_id=current_user.id)
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
@@ -50,6 +53,8 @@ async def approve_asset(
         return asset
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
@@ -69,6 +74,8 @@ async def reject_asset(
         return asset
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
@@ -89,6 +96,8 @@ async def update_asset(
         return asset
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
@@ -108,6 +117,8 @@ async def delete_asset(
         return {"message": "Asset deleted successfully"}
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:

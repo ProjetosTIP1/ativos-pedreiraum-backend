@@ -7,6 +7,7 @@ from infrastructure.repositories.category_repository import SQLCategoryRepositor
 from application.services.asset_service import AssetService
 from domain.entities import Asset
 from domain.enums import AssetCategory
+from core.helpers.exceptions_helper import ServiceException, to_http_exception
 
 router = APIRouter(prefix="/assets", tags=["Assets"])
 
@@ -42,6 +43,8 @@ async def list_assets(
         )
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
@@ -54,6 +57,8 @@ async def get_highlights(service: AssetService = Depends(get_asset_service)):
         return await service.get_featured_assets()
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
@@ -69,6 +74,8 @@ async def get_asset(slug: str, service: AssetService = Depends(get_asset_service
         return asset
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:

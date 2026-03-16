@@ -10,6 +10,7 @@ from api.v1.categories import router as category_router
 from api.v1.admin_assets import router as admin_router
 from api.v1.auth import router as auth_router
 from api.v1.images import router as image_router
+from core.helpers.exceptions_helper import ServiceException, to_http_exception
 
 
 @asynccontextmanager
@@ -58,6 +59,8 @@ async def root():
         return {"message": f"Welcome to {settings.APP_NAME} API"}
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:

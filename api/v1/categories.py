@@ -5,6 +5,7 @@ from core.database import get_db_connection
 from infrastructure.repositories.category_repository import SQLCategoryRepository
 from application.services.category_service import CategoryService
 from domain.entities import Category
+from core.helpers.exceptions_helper import ServiceException, to_http_exception
 
 router = APIRouter(prefix="/categories", tags=["Categories"])
 
@@ -22,6 +23,8 @@ async def list_categories(service: CategoryService = Depends(get_category_servic
         return await service.get_all_categories()
     except HTTPException:
         raise
+    except ServiceException as e:
+        raise to_http_exception(e)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:

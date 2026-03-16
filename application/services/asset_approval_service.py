@@ -3,11 +3,19 @@ from typing import Optional
 from domain.entities import Asset
 from domain.enums import AssetStatus
 from domain.interfaces import IAssetRepository
+from core.helpers.exceptions_helper import (
+    ServiceException,
+    ValidationServiceException,
+    InfrastructureServiceException,
+)
 
 
 class AssetApprovalService:
     def __init__(self, asset_repo: IAssetRepository):
-        self.asset_repo = asset_repo
+        try:
+            self.asset_repo = asset_repo
+        except Exception as e:
+            raise InfrastructureServiceException("Failed to initialize asset approval service") from e
 
     async def approve_asset(
         self, asset_id: UUID, final_data: Optional[dict] = None
@@ -16,19 +24,26 @@ class AssetApprovalService:
         Approves an asset, optionally updating its details (price, etc.)
         and setting status to AVAILABLE.
         """
-        asset = await self.asset_repo.get_by_id(asset_id)
-        if not asset:
-            return None
+        try:
+            asset = await self.asset_repo.get_by_id(asset_id)
+            if not asset:
+                return None
 
-        if asset.status != AssetStatus.PENDING:
-            raise ValueError(
-                f"Asset is not in PENDING status. Current status: {asset.status}"
-            )
+            if asset.status != AssetStatus.PENDING:
+                raise ValidationServiceException(
+                    f"Asset is not in PENDING status. Current status: {asset.status}"
+                )
 
-        update_data = final_data or {}
-        update_data["status"] = AssetStatus.AVAILABLE
+            update_data = final_data or {}
+            update_data["status"] = AssetStatus.AVAILABLE
 
-        return await self.asset_repo.update(asset_id, update_data)
+            return await self.asset_repo.update(asset_id, update_data)
+        except ServiceException:
+            raise
+        except ValueError as e:
+            raise ValidationServiceException(str(e)) from e
+        except Exception as e:
+            raise InfrastructureServiceException("Failed to approve asset") from e
 
     async def reject_asset(
         self, asset_id: UUID, reason: Optional[str] = None
@@ -36,13 +51,20 @@ class AssetApprovalService:
         """
         Rejects a pending asset.
         """
-        asset = await self.asset_repo.get_by_id(asset_id)
-        if not asset:
-            return None
+        try:
+            asset = await self.asset_repo.get_by_id(asset_id)
+            if not asset:
+                return None
 
-        if asset.status != AssetStatus.PENDING:
-            raise ValueError(
-                f"Asset is not in PENDING status. Current status: {asset.status}"
-            )
+            if asset.status != AssetStatus.PENDING:
+                raise ValidationServiceException(
+                    f"Asset is not in PENDING status. Current status: {asset.status}"
+                )
 
-        return await self.asset_repo.update(asset_id, {"status": AssetStatus.REJECTED})
+            return await self.asset_repo.update(asset_id, {"status": AssetStatus.REJECTED})
+        except ServiceException:
+            raise
+        except ValueError as e:
+            raise ValidationServiceException(str(e)) from e
+        except Exception as e:
+            raise InfrastructureServiceException("Failed to reject asset") from e
