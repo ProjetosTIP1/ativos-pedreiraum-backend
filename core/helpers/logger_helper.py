@@ -1,5 +1,5 @@
-from core.config.settings import settings
-from core.util.context import get_correlation_id
+from core.config import settings
+from core.helpers.context_helper import get_correlation_id
 
 from core.helpers.file_log_helper import write_on_file
 

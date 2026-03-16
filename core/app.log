@@ -1,0 +1,8 @@
+2026-03-16 14:15:27 |  | ERROR  Error listing assets: 1 validation error for Asset
+main_image
+  Input should be a valid URL, relative URL without a base [type=url_parsing, input_value='/uploads/da8c779b8c1c4d1fa5ca15f859b2d853.jpg', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/url_parsing 
+2026-03-16 14:16:44 |  | ERROR  Error listing assets: 1 validation error for Asset
+main_image
+  Input should be a valid URL, relative URL without a base [type=url_parsing, input_value='/uploads/da8c779b8c1c4d1fa5ca15f859b2d853.jpg', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/url_parsing 

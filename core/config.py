@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
+    
+    DEBUG: bool = Field(default=False)
+    DEVELOPMENT_ENV: bool = Field(default=False)
 
     # Database
     POSTGRES_USER: str = Field(default="postgres")
