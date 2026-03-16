@@ -1,33 +1,40 @@
 # Valemix Assets Catalog - Frontend Integration Guide
 
-This guide provides the necessary technical details to integrate the frontend with the FastAPI backend.
+This guide provides the technical details required to integrate the frontend with the FastAPI backend, ensuring architectural consistency and type safety across both layers.
 
-## 1. Authentication Mode
+## 1. Authentication & Security
 
-The system uses **HTTP-only Cookies** for token management.
+The system uses **HTTP-only Cookies** for secure session management.
 
-- **Mechanism**: On successful login, the server sets a `Set-Cookie` header with the `access_token`.
-- **Security**: The cookie is `HttpOnly`, `SameSite=Lax`, and should be `Secure` in production.
-- **Client Handling**: The browser automatically sends the cookie with every request to the backend. **Do not** attempt to read the token from JavaScript.
-- **CORS**: Ensure `withCredentials: true` is set in your HTTP client (Axios/Fetch).
+### Mechanism
+- **Login**: `POST /api/v1/auth/login`. On success, the server responds with a `Set-Cookie` header containing the `access_token`.
+- **Security**: The cookie is marked as `HttpOnly` (preventing XSS access) and `SameSite=Lax`.
+- **Automatic Handling**: The browser automatically includes this cookie in all subsequent requests to the backend domain.
+
+### Frontend Implementation
+- **CORS**: You **must** configure your HTTP client (Axios/Fetch) with `withCredentials: true`.
+- **No Token Storage**: Do not attempt to store or read the token in `localStorage` or `sessionStorage`.
+- **Role Checking**: Use the `user` object returned during login (or from a `/me` endpoint if implemented) to manage UI permissions.
 
 ---
 
-## 2. Entities & TypeScript Interfaces
+## 2. Shared Domain Entities (TypeScript)
+
+To maintain consistency with the Pydantic models in the backend, use these interfaces and enums.
 
 ### Enums
 ```typescript
+export enum UserRole {
+  ADMIN = "ADMIN",
+  REGULAR = "REGULAR"
+}
+
 export enum AssetStatus {
   PENDING = "PENDING",
   AVAILABLE = "AVAILABLE",
   RESERVED = "RESERVED",
   SOLD = "SOLD",
   REJECTED = "REJECTED"
-}
-
-export enum UserRole {
-  ADMIN = "ADMIN",
-  REGULAR = "REGULAR"
 }
 
 export enum AssetCondition {
@@ -45,16 +52,22 @@ export enum AssetCategory {
   PARTS = "PARTS",
   OTHER = "OTHER"
 }
+
+export enum PartState {
+  NEW = "NEW",
+  REFURBISHED = "REFURBISHED",
+  USED = "USED"
+}
 ```
 
-### Core Entities
+### Interfaces
 ```typescript
 export interface User {
   id: string; // UUID
   email: string;
   full_name: string;
   role: UserRole;
-  created_at: string; // ISO Date
+  created_at: string; // ISO DateTime
 }
 
 export interface Category {
@@ -85,6 +98,30 @@ export interface ImageMetadata {
   created_at: string;
 }
 
+/** 
+ * Polymorphic Specifications 
+ * Stored in the 'specifications' field based on category.
+ */
+export interface TruckSpecs {
+  mileage: number;
+  traction: string;
+  load_capacity: number;
+  fuel_type: string;
+}
+
+export interface ExcavatorSpecs {
+  operating_weight: number;
+  power: number;
+  hours: number;
+  bucket_capacity?: number;
+}
+
+export interface PartSpecs {
+  oem_code: string;
+  compatible_equipment: string;
+  part_state: PartState;
+}
+
 export interface Asset {
   id: string; // UUID
   slug: string;
@@ -107,121 +144,90 @@ export interface Asset {
   branch_id: number;
   created_by_user_id?: string;
   created_at: string;
-  specifications?: Record<string, any>;
+  specifications?: TruckSpecs | ExcavatorSpecs | PartSpecs | any;
 }
 ```
 
 ---
 
-## 3. API Endpoints
+## 3. Cross-Platform Validation (Zod)
 
-### Authentication (`/api/v1/auth`)
+We recommend using **Zod** on the frontend to mirror the backend's Pydantic validation. This ensures that data is valid before ever hitting the network.
 
-#### **POST /login**
-Authenticates the user and sets the `access_token` cookie.
-- **Request (Form Data)**:
-  - `username`: Email
-  - `password`: Password
-- **Response (200 OK)**:
-  ```json
-  {
-    "message": "Logged in successfully",
-    "user": { ...UserEntity }
-  }
-  ```
+**Example: Asset Validation Schema**
+```typescript
+import { z } from "zod";
 
-#### **POST /logout**
-Clears the session cookie.
-- **Response (200 OK)**:
-  ```json
-  { "message": "Logged out successfully" }
-  ```
+export const assetSchema = z.object({
+  name: z.string().min(3).max(100),
+  year: z.number().int().min(1900).max(new Date().getFullYear() + 1),
+  price: z.number().positive().optional(),
+  category: z.nativeEnum(AssetCategory),
+  // Add more as needed
+});
+```
 
 ---
 
-### Public Assets (`/api/v1/assets`)
+## 4. API Endpoints Reference
 
-#### **GET /**
-List assets with optional filters.
-- **Query Parameters**:
-  - `category`: `AssetCategory`
-  - `brand`: string
-  - `min_year`: number
-  - `max_year`: number
-  - `q`: string (Search query)
-  - `limit`: number (default 20)
-  - `offset`: number (default 0)
-- **Response**: `Asset[]`
+Base URL: `/api/v1`
 
-#### **GET /highlights**
-Get featured assets for the homepage.
-- **Response**: `Asset[]`
+### Authentication (`/auth`)
 
-#### **GET /{slug}**
-Get detailed information for a specific asset.
-- **Response**: `Asset`
+| Method | Endpoint | Auth | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/login` | Public | Form data: `username` (email), `password`. Sets cookie. |
+| `POST` | `/logout` | Public | Clears session cookie. |
 
----
+### Public Assets (`/assets`)
 
-### Images (`/api/v1/images`)
-*Requires Authentication for modifications*
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/` | List assets. Query: `category`, `brand`, `min_year`, `max_year`, `q`, `limit`, `offset`. |
+| `GET` | `/highlights` | Returns featured assets. |
+| `GET` | `/{slug}` | Returns detailed asset information by its slug. |
 
-#### **POST /**
-Uploads an image file to local storage and saves metadata.
-- **Request (multipart/form-data)**:
-  - `asset_id`: string (UUID)
-  - `name`: string
-  - `file`: File (The image file)
-  - `alt_text`: string (optional)
-  - `is_main`: boolean (optional, default: false)
-- **Response**: `ImageMetadata`
+### Categories (`/categories`)
 
-#### **GET /asset/{asset_id}**
-List all images and metadata for a specific asset.
-- **Response**: `ImageMetadata[]`
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/` | List all available categories and hierarchy. |
 
-#### **POST /{image_id}/set-main**
-Set an image as the main image for its asset. Automatically updates the asset's `main_image` field.
-- **Query Parameters**: `asset_id` (UUID)
-- **Response**: `{ "message": "Main image updated successfully" }`
+### Images (`/images`)
 
-#### **PATCH /{image_id}**
-Update metadata for an image.
-- **Request Body**: `Partial<ImageMetadata>`
-- **Response**: `ImageMetadata`
+| Method | Endpoint | Auth | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/` | Auth | Upload image (multipart). Requires `asset_id`, `name`, `file`. |
+| `GET` | `/asset/{id}`| Public | List all images for a specific asset. |
+| `POST` | `/{id}/set-main`| Auth | Set specific image as main. Query: `asset_id`. |
+| `PATCH`| `/{id}` | Auth | Update image metadata (JSON body). |
+| `DELETE`|`/{id}` | Auth | Remove image and metadata. |
 
-#### **DELETE /{image_id}**
-Delete an image's metadata.
-- **Response**: `{ "message": "Image and metadata deleted successfully" }`
+### Admin Operations (`/admin/assets`)
+*All endpoints require Admin role.*
 
-#### **GET /**
-List all categories.
-- **Response**: `Category[]`
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/` | Create new asset. Initial status: `PENDING`. |
+| `PATCH` | `/{id}` | Update asset details. |
+| `POST` | `/{id}/approve` | Change status to `AVAILABLE`. Optional body to set final price. |
+| `POST` | `/{id}/reject` | Change status to `REJECTED`. |
+| `DELETE`| `/{id}` | Permanently remove asset. |
 
 ---
 
-### Admin Assets (`/api/v1/admin/assets`)
-*Requires Admin Role / Session Cookie*
+## 5. Error Handling
 
-#### **POST /**
-Submit a new asset.
-- **Request Body**: `Partial<Asset>`
-- **Response**: `Asset` (Initially set to `PENDING`)
+The API returns standard HTTP status codes. Errors include a descriptive JSON body:
 
-#### **PATCH /{asset_id}**
-Update an existing asset.
-- **Request Body**: `Partial<Asset>`
-- **Response**: `Asset`
+- **401 Unauthorized**: Missing or invalid session cookie. Redirect to login.
+- **403 Forbidden**: Authenticated but insufficient permissions (e.g., non-admin accessing `/admin`).
+- **400 Bad Request**: Validation error. Check the `detail` field for specific messages.
+- **404 Not Found**: Resource doesn't exist.
 
-#### **POST /{asset_id}/approve**
-Admin workflow to approve an asset and make it visible.
-- **Request Body**: Optional `{ "price": number, ... }`
-- **Response**: `Asset` (Status changes to `AVAILABLE`)
-
-#### **POST /{asset_id}/reject**
-Admin workflow to reject an asset.
-- **Response**: `Asset` (Status changes to `REJECTED`)
-
-#### **DELETE /{asset_id}**
-Delete an asset.
-- **Response**: `{ "message": "Asset deleted successfully" }`
+```json
+{
+  "detail": "Error message explanation here"
+}
+```
