@@ -167,13 +167,13 @@ Get detailed information for a specific asset.
 *Requires Authentication for modifications*
 
 #### **POST /**
-Adds metadata for an image (alt text, name, dimensions).
-- **Request Body**:
+Uploads an image file to local storage and saves metadata.
+- **Request (multipart/form-data)**:
   - `asset_id`: string (UUID)
-  - `url`: string
   - `name`: string
+  - `file`: File (The image file)
   - `alt_text`: string (optional)
-  - `is_main`: boolean (default: false)
+  - `is_main`: boolean (optional, default: false)
 - **Response**: `ImageMetadata`
 
 #### **GET /asset/{asset_id}**

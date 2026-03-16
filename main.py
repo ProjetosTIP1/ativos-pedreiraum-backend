@@ -1,5 +1,7 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from core.config import settings
 from contextlib import asynccontextmanager
 from core.database import DatabaseManager
@@ -12,6 +14,9 @@ from api.v1.images import router as image_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Ensure upload directory exists
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    
     # Startup: Initialize the database pool
     db_manager = DatabaseManager()
     await db_manager.connect()
@@ -42,6 +47,9 @@ app.include_router(category_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(image_router, prefix="/api/v1")
+
+# Mount Static Files for Image Served Locally
+app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
 
 @app.get("/")

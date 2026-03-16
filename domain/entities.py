@@ -69,7 +69,7 @@ class Branch(BaseEntity):
 class ImageMetadata(BaseEntity):
     id: UUID = Field(default_factory=uuid4)
     asset_id: UUID
-    url: HttpUrl
+    url: str
     name: str
     alt_text: Optional[str] = None
     content_type: Optional[str] = None

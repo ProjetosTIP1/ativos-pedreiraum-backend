@@ -1,7 +1,7 @@
 import asyncpg
 from uuid import UUID
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from core.database import get_db_connection
 from infrastructure.repositories.image_repository import SQLImageRepository
 from application.services.image_service import ImageService
@@ -9,7 +9,6 @@ from domain.entities import ImageMetadata, User
 from api.v1.auth import get_current_user
 
 router = APIRouter(prefix="/images", tags=["Images"])
-
 
 async def get_image_service(
     conn: asyncpg.Connection = Depends(get_db_connection),
@@ -20,28 +19,27 @@ async def get_image_service(
 
 @router.post("/", response_model=ImageMetadata, status_code=status.HTTP_201_CREATED)
 async def add_image(
-    asset_id: UUID,
-    url: str,
-    name: str,
-    alt_text: Optional[str] = None,
-    is_main: bool = False,
-    metadata_extra: Optional[dict] = None,
+    asset_id: UUID = Form(...),
+    name: str = Form(...),
+    file: UploadFile = File(...),
+    alt_text: Optional[str] = Form(None),
+    is_main: bool = Form(False),
     current_user: User = Depends(get_current_user),
-    service: ImageService = Depends(get_image_service),
+    service: ImageService = Depends(get_image_service),  # noqa: B008
 ):
     """
-    Adds metadata for an already uploaded image. 
-    In the future, this endpoint can be expanded to handle direct file uploads.
+    Uploads an image file to local storage and saves metadata.
     """
     try:
-        return await service.add_image_metadata(
+        return await service.upload_and_save_metadata(
             asset_id=asset_id,
-            url=url,
+            file=file,
             name=name,
             alt_text=alt_text,
-            is_main=is_main,
-            **(metadata_extra or {})
+            is_main=is_main
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

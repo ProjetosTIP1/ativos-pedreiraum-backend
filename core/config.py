@@ -34,10 +34,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
 
-    # Cloudinary
-    CLOUDINARY_CLOUD_NAME: str = Field(default="")
-    CLOUDINARY_API_KEY: str = Field(default="")
-    CLOUDINARY_API_SECRET: str = Field(default="")
+    # Local Storage
+    UPLOAD_DIR: str = Field(default="uploads")
 
     # Application
     APP_NAME: str = "Valemix Assets Catalog"
