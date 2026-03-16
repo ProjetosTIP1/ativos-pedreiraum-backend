@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional, Union, Annotated
 from uuid import UUID, uuid4
-from pydantic import BaseModel, Field, HttpUrl, ConfigDict, field_validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 from .enums import AssetStatus, AssetCondition, AssetCategory, PartState, UserRole
 
 
@@ -95,8 +95,8 @@ class Asset(BaseEntity):
     status: AssetStatus = AssetStatus.PENDING
     price: Optional[float] = None
     description: str
-    main_image: HttpUrl
-    gallery: List[HttpUrl] = Field(default_factory=list)
+    main_image: str
+    gallery: List[str] = Field(default_factory=list)
     is_featured: bool = False
     view_count: int = 0
     branch_id: int
