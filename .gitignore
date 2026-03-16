@@ -13,3 +13,4 @@ core/.env
 tmp/
 uploads/
 /core/app.log
+/playground.py

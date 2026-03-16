@@ -1,10 +1,8 @@
-import logging
 import asyncpg
 from typing import AsyncGenerator, Optional
 from .config import settings
 
-logger = logging.getLogger(__name__)
-
+from core.helpers.logger_helper import logger
 
 class DatabaseManager:
     """

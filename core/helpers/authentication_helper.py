@@ -4,7 +4,7 @@ import bcrypt
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
 
-from core.config.settings import settings
+from core.config import settings
 from core.helpers.logger_helper import logger
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/o/token")
