@@ -15,7 +15,9 @@ class AssetApprovalService:
         try:
             self.asset_repo = asset_repo
         except Exception as e:
-            raise InfrastructureServiceException("Failed to initialize asset approval service") from e
+            raise InfrastructureServiceException(
+                "Failed to initialize asset approval service"
+            ) from e
 
     async def approve_asset(
         self, asset_id: UUID, final_data: Optional[dict] = None
@@ -61,7 +63,9 @@ class AssetApprovalService:
                     f"Asset is not in PENDING status. Current status: {asset.status}"
                 )
 
-            return await self.asset_repo.update(asset_id, {"status": AssetStatus.REJECTED})
+            return await self.asset_repo.update(
+                asset_id, {"status": AssetStatus.REJECTED}
+            )
         except ServiceException:
             raise
         except ValueError as e:

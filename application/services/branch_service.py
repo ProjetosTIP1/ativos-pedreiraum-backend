@@ -13,7 +13,9 @@ class BranchService:
         try:
             self.branch_repo = branch_repo
         except Exception as e:
-            raise InfrastructureServiceException("Failed to initialize branch service") from e
+            raise InfrastructureServiceException(
+                "Failed to initialize branch service"
+            ) from e
 
     async def create_branch(self, branch_data: dict) -> Branch:
         try:

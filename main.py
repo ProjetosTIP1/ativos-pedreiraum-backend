@@ -17,7 +17,7 @@ from core.helpers.exceptions_helper import ServiceException, to_http_exception
 async def lifespan(app: FastAPI):
     # Ensure upload directory exists
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-    
+
     # Startup: Initialize the database pool
     db_manager = DatabaseManager()
     await db_manager.connect()

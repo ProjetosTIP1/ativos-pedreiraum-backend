@@ -17,6 +17,7 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
+
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 COOKIE_NAME = "access_token"

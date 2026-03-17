@@ -132,9 +132,7 @@ class IImageRepository(ABC):
         pass
 
     @abstractmethod
-    async def update(
-        self, image_id: UUID, image_data: dict
-    ) -> Optional[ImageMetadata]:
+    async def update(self, image_id: UUID, image_data: dict) -> Optional[ImageMetadata]:
         pass
 
     @abstractmethod

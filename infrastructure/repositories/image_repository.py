@@ -7,6 +7,7 @@ from core.helpers.logger_helper import logger
 
 IMAGE_COLUMNS = "id, asset_id, url, name, alt_text, content_type, size, width, height, is_main, created_at"
 
+
 class SQLImageRepository(IImageRepository):
     def __init__(self, connection: asyncpg.Connection):
         try:
@@ -44,7 +45,7 @@ class SQLImageRepository(IImageRepository):
                 image_dict["url"] = str(image_dict["url"])
 
             columns = ", ".join(image_dict.keys())
-            placeholders = ", ".join([f"${i+1}" for i in range(len(image_dict))])
+            placeholders = ", ".join([f"${i + 1}" for i in range(len(image_dict))])
             values = list(image_dict.values())
 
             sql = f"INSERT INTO image_metadata ({columns}) VALUES ({placeholders}) RETURNING {IMAGE_COLUMNS}"
@@ -59,7 +60,7 @@ class SQLImageRepository(IImageRepository):
             if not image_data:
                 return await self.get_by_id(image_id)
 
-            set_clauses = [f"{k} = ${i+1}" for i, k in enumerate(image_data.keys())]
+            set_clauses = [f"{k} = ${i + 1}" for i, k in enumerate(image_data.keys())]
             values = list(image_data.values())
 
             idx = len(values) + 1
@@ -90,12 +91,13 @@ class SQLImageRepository(IImageRepository):
                 # 2. Reset all images for this asset to not-main
                 await self.connection.execute(
                     "UPDATE image_metadata SET is_main = FALSE WHERE asset_id = $1",
-                    asset_id
+                    asset_id,
                 )
                 # 3. Set the specific image as main
                 result = await self.connection.execute(
                     "UPDATE image_metadata SET is_main = TRUE WHERE id = $1 AND asset_id = $2",
-                    image_id, asset_id
+                    image_id,
+                    asset_id,
                 )
 
                 # Also update the main_image field in the assets table for quick access
@@ -103,10 +105,13 @@ class SQLImageRepository(IImageRepository):
                 if image:
                     await self.connection.execute(
                         "UPDATE assets SET main_image = $1 WHERE id = $2",
-                        str(image.url), asset_id
+                        str(image.url),
+                        asset_id,
                     )
 
                 return result == "UPDATE 1"
         except Exception as e:
-            logger.error(f"Error setting main image {image_id} for asset {asset_id}: {e}")
+            logger.error(
+                f"Error setting main image {image_id} for asset {asset_id}: {e}"
+            )
             raise

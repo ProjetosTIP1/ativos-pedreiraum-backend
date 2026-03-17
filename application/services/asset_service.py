@@ -19,7 +19,9 @@ class AssetService:
             self.asset_repo = asset_repo
             self.category_repo = category_repo
         except Exception as e:
-            raise InfrastructureServiceException("Failed to initialize asset service") from e
+            raise InfrastructureServiceException(
+                "Failed to initialize asset service"
+            ) from e
 
     async def get_all_assets(self, **filters) -> List[Asset]:
         try:
@@ -46,7 +48,9 @@ class AssetService:
         except ServiceException:
             raise
         except Exception as e:
-            raise InfrastructureServiceException("Failed to fetch featured assets") from e
+            raise InfrastructureServiceException(
+                "Failed to fetch featured assets"
+            ) from e
 
     async def create_asset(
         self, asset_data: dict, user_id: Optional[UUID] = None

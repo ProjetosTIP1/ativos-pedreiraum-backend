@@ -19,7 +19,9 @@ class UserService:
         try:
             self.user_repo = user_repo
         except Exception as e:
-            raise InfrastructureServiceException("Failed to initialize user service") from e
+            raise InfrastructureServiceException(
+                "Failed to initialize user service"
+            ) from e
 
     async def create_user(self, user_data: dict) -> User:
         try:

@@ -19,7 +19,9 @@ class ImageService:
         try:
             self.image_repo = image_repo
         except Exception as e:
-            raise InfrastructureServiceException("Failed to initialize image service") from e
+            raise InfrastructureServiceException(
+                "Failed to initialize image service"
+            ) from e
 
     async def upload_and_save_metadata(
         self,
@@ -53,7 +55,9 @@ class ImageService:
                     while content := await file.read(1024 * 1024):  # 1MB chunks
                         await out_file.write(content)
             except Exception as e:
-                raise InfrastructureServiceException(f"Failed to save file: {str(e)}") from e
+                raise InfrastructureServiceException(
+                    f"Failed to save file: {str(e)}"
+                ) from e
 
             # 4. Determine URL and save metadata
             # The URL should be relative for the static file route mount
@@ -92,7 +96,9 @@ class ImageService:
         except ValueError as e:
             raise ValidationServiceException(str(e)) from e
         except Exception as e:
-            raise InfrastructureServiceException("Failed to upload image metadata") from e
+            raise InfrastructureServiceException(
+                "Failed to upload image metadata"
+            ) from e
 
     async def get_asset_images(self, asset_id: UUID) -> List[ImageMetadata]:
         try:
@@ -147,4 +153,6 @@ class ImageService:
         except ValueError as e:
             raise ValidationServiceException(str(e)) from e
         except Exception as e:
-            raise InfrastructureServiceException("Failed to update image metadata") from e
+            raise InfrastructureServiceException(
+                "Failed to update image metadata"
+            ) from e

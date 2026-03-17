@@ -4,7 +4,9 @@ from fastapi import HTTPException
 class ServiceException(Exception):
     """Base exception for application/service failures."""
 
-    def __init__(self, message: str, status_code: int = 500, error_code: str = "service_error"):
+    def __init__(
+        self, message: str, status_code: int = 500, error_code: str = "service_error"
+    ):
         self.message = message
         self.status_code = status_code
         self.error_code = error_code
@@ -13,7 +15,9 @@ class ServiceException(Exception):
 
 class ValidationServiceException(ServiceException):
     def __init__(self, message: str = "Invalid request data"):
-        super().__init__(message=message, status_code=400, error_code="validation_error")
+        super().__init__(
+            message=message, status_code=400, error_code="validation_error"
+        )
 
 
 class NotFoundServiceException(ServiceException):
@@ -28,7 +32,9 @@ class ConflictServiceException(ServiceException):
 
 class InfrastructureServiceException(ServiceException):
     def __init__(self, message: str = "Internal server error"):
-        super().__init__(message=message, status_code=500, error_code="infrastructure_error")
+        super().__init__(
+            message=message, status_code=500, error_code="infrastructure_error"
+        )
 
 
 def to_http_exception(exc: ServiceException) -> HTTPException:

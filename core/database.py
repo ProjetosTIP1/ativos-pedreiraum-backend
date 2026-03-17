@@ -4,6 +4,7 @@ from .config import settings
 
 from core.helpers.logger_helper import logger
 
+
 class DatabaseManager:
     """
     Singleton class to manage the asyncpg connection pool.
