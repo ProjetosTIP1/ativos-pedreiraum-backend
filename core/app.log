@@ -30,3 +30,38 @@ main_image
 
   File "C:\Users\herik.rezende\Projetos\ativos-project\backend\api\v1\images.py", line 43, in upload_image
     POST /api/v1/images/ 
+2026-03-17 16:07:24 |  | ERROR  Database connection error: 1 validation error:
+  {'type': 'missing', 'loc': ('body', 'file'), 'msg': 'Field required', 'input': None}
+
+  File "C:\Users\herik.rezende\Projetos\ativos-project\backend\api\v1\images.py", line 43, in upload_image
+    POST /api/v1/images/ 
+2026-03-17 16:12:59 |  | ERROR  Database connection error: 1 validation error:
+  {'type': 'missing', 'loc': ('body', 'file'), 'msg': 'Field required', 'input': None}
+
+  File "C:\Users\herik.rezende\Projetos\ativos-project\backend\api\v1\images.py", line 43, in upload_image
+    POST /api/v1/images/ 
+2026-03-17 16:19:24 |  | ERROR  Database connection error: 1 validation error:
+  {'type': 'missing', 'loc': ('body', 'file'), 'msg': 'Field required', 'input': None}
+
+  File "C:\Users\herik.rezende\Projetos\ativos-project\backend\api\v1\images.py", line 43, in upload_image
+    POST /api/v1/images/ 
+2026-03-17 16:28:45 |  | ERROR  Database connection error: 1 validation error:
+  {'type': 'missing', 'loc': ('body', 'file'), 'msg': 'Field required', 'input': None}
+
+  File "C:\Users\herik.rezende\Projetos\ativos-project\backend\api\v1\images.py", line 43, in upload_image
+    POST /api/v1/images/ 
+2026-03-17 16:33:23 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-17 16:34:58 |  | ERROR  Database connection error: 2 validation errors for ImageMetadata
+asset_id
+  Field required [type=missing, input_value={'filename': '6a306e4178a...-03-17T16:34:58.739303'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+name
+  Field required [type=missing, input_value={'filename': '6a306e4178a...-03-17T16:34:58.739303'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing 
+2026-03-17 16:43:36 |  | ERROR  Database connection error: 2 validation errors for ImageMetadata
+asset_id
+  Field required [type=missing, input_value={'filename': 'cb158e28efb...-03-17T16:43:12.090069'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+name
+  Field required [type=missing, input_value={'filename': 'cb158e28efb...-03-17T16:43:12.090069'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing 

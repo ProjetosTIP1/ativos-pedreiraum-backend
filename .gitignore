@@ -14,3 +14,5 @@ tmp/
 uploads/
 /core/app.log
 /playground.py
+/images
+core/app.log
