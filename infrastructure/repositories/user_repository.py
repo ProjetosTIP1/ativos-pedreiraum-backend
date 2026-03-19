@@ -1,11 +1,10 @@
+from domain.entities import UserCreateRequest
 import asyncpg
 from typing import List, Optional
 from uuid import UUID
 from domain.entities import User
 from domain.interfaces import IUserRepository
 from core.helpers.logger_helper import logger
-
-USER_COLUMNS = "id, email, full_name, role, hashed_password, created_at"
 
 
 class SQLUserRepository(IUserRepository):
@@ -18,7 +17,14 @@ class SQLUserRepository(IUserRepository):
 
     async def get_by_id(self, user_id: UUID) -> Optional[User]:
         try:
-            query = f"SELECT {USER_COLUMNS} FROM users WHERE id = $1"
+            query = """SELECT id,
+            email,
+            full_name,
+            contact,
+            role,
+            hashed_password,
+            created_at
+            FROM users WHERE id = $1"""
             row = await self.connection.fetchrow(query, user_id)
             if row:
                 return User.model_validate(dict(row))
@@ -29,7 +35,14 @@ class SQLUserRepository(IUserRepository):
 
     async def get_by_email(self, email: str) -> Optional[User]:
         try:
-            query = f"SELECT {USER_COLUMNS} FROM users WHERE email = $1"
+            query = """SELECT id,
+            email,
+            full_name,
+            contact,
+            role,
+            hashed_password,
+            created_at
+            FROM users WHERE email = $1"""
             row = await self.connection.fetchrow(query, email)
             if row:
                 return User.model_validate(dict(row))
@@ -40,21 +53,41 @@ class SQLUserRepository(IUserRepository):
 
     async def list_all(self) -> List[User]:
         try:
-            query = f"SELECT {USER_COLUMNS} FROM users ORDER BY created_at DESC"
+            query = """SELECT id,
+            email,
+            full_name,
+            contact,
+            role,
+            hashed_password,
+            created_at
+            FROM users ORDER BY created_at DESC"""
             rows = await self.connection.fetch(query)
             return [User.model_validate(dict(row)) for row in rows]
         except Exception as e:
             logger.error(f"Error listing users: {e}")
             raise
 
-    async def create(self, user: User) -> User:
+    async def create(self, user: UserCreateRequest, hashed_password: str) -> User:
         try:
-            user_dict = user.model_dump(exclude={"created_at"})
+            user_dict = user.model_dump(exclude={"password", "created_at"})
+            user_dict["hashed_password"] = hashed_password
+
+            # Convert Pydantic types to basic ones that asyncpg understands
+            for key, value in user_dict.items():
+                if hasattr(value, "value") and not isinstance(value, str):  # Enums
+                    user_dict[key] = value.value
+
             columns = ", ".join(user_dict.keys())
             placeholders = ", ".join([f"${i + 1}" for i in range(len(user_dict))])
             values = list(user_dict.values())
 
-            sql = f"INSERT INTO users ({columns}) VALUES ({placeholders}) RETURNING {USER_COLUMNS}"
+            sql = f"""INSERT INTO users ({columns}) VALUES ({placeholders}) RETURNING id,
+            email,
+            full_name,
+            contact,
+            role,
+            hashed_password,
+            created_at"""
             row = await self.connection.fetchrow(sql, *values)
             if not row:
                 raise Exception("Failed to create user")
@@ -71,11 +104,25 @@ class SQLUserRepository(IUserRepository):
             user_data.pop("id", None)
             user_data.pop("created_at", None)
 
-            set_clauses = [f"{k} = ${i + 1}" for i, k in enumerate(user_data.keys())]
-            values = list(user_data.values())
+            # Convert Pydantic types to basic ones that asyncpg understands
+            for key, value in user_data.items():
+                if hasattr(value, "value") and not isinstance(value, str):  # Enums
+                    user_data[key] = value.value
+
+            set_clauses = []
+            values = []
+            for i, (k, v) in enumerate(user_data.items()):
+                set_clauses.append(f"{k} = ${i + 1}")
+                values.append(v)
 
             idx = len(values) + 1
-            sql = f"UPDATE users SET {', '.join(set_clauses)} WHERE id = ${idx} RETURNING {USER_COLUMNS}"
+            sql = f"""UPDATE users SET {', '.join(set_clauses)} WHERE id = ${idx} RETURNING id,
+            email,
+            full_name,
+            contact,
+            role,
+            hashed_password,
+            created_at"""
             values.append(user_id)
 
             row = await self.connection.fetchrow(sql, *values)

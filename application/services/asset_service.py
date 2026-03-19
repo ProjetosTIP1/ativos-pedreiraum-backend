@@ -36,6 +36,25 @@ class AssetService:
         except Exception as e:
             raise InfrastructureServiceException("Failed to list assets") from e
 
+    async def get_asset_by_id(self, asset_id: UUID) -> Optional[Asset]:
+        try:
+            return await self.asset_repo.get_by_id(asset_id)
+        except ServiceException:
+            raise
+        except Exception as e:
+            raise InfrastructureServiceException("Failed to fetch asset by ID") from e
+
+    async def get_asset_by_slug(self, slug: str) -> Optional[Asset]:
+        try:
+            asset = await self.asset_repo.get_by_slug(slug)
+            if asset:
+                await self.asset_repo.increment_view_count(asset.id)
+            return asset
+        except ServiceException:
+            raise
+        except Exception as e:
+            raise InfrastructureServiceException("Failed to fetch asset by slug") from e
+
     async def get_featured_assets(self) -> List[Asset]:
         try:
             return await self.asset_repo.get_featured()

@@ -1,7 +1,6 @@
 from core.config import settings
 from fastapi.responses import FileResponse
 import mimetypes
-import uuid
 from pathlib import Path
 import asyncpg
 from uuid import UUID
@@ -63,8 +62,6 @@ async def upload_image(
         return await service.upload_and_save_metadata(
             asset_id=asset_id,
             file=file,
-            name=file.filename or f"image_{uuid.uuid4().hex[:8]}",
-            alt_text=f"Image for asset {asset_id} at position {position}",
             is_main=is_main,
             position=position,
         )

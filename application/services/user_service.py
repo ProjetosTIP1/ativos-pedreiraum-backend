@@ -1,7 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 from passlib.context import CryptContext
-from domain.entities import User
+from domain.entities import User, UserCreateRequest
 from domain.interfaces import IUserRepository
 from core.helpers.exceptions_helper import (
     ServiceException,
@@ -23,18 +23,18 @@ class UserService:
                 "Failed to initialize user service"
             ) from e
 
-    async def create_user(self, user_data: dict) -> User:
+    async def create_user(self, user_data: UserCreateRequest) -> User:
         try:
             # Check if user already exists
-            existing = await self.user_repo.get_by_email(user_data["email"])
+            existing = await self.user_repo.get_by_email(user_data.email)
             if existing:
                 raise ConflictServiceException(
-                    f"User with email {user_data['email']} already exists."
+                    f"User with email {user_data.email} already exists."
                 )
 
             # Hash password
-            password = user_data.pop("password")
-            user_data["hashed_password"] = pwd_context.hash(password)
+            password = user_data.password
+            user_data.hashed_password = pwd_context.hash(password)
 
             user = User.model_validate(user_data)
             return await self.user_repo.create(user)

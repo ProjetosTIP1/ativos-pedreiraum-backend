@@ -5,8 +5,6 @@ from domain.entities import ImageMetadata
 from domain.interfaces import IImageRepository
 from core.helpers.logger_helper import logger
 
-IMAGE_COLUMNS = "id, asset_id, url, name, alt_text, content_type, size, width, height, is_main, position, created_at"
-
 
 class SQLImageRepository(IImageRepository):
     def __init__(self, connection: asyncpg.Connection):
@@ -18,7 +16,13 @@ class SQLImageRepository(IImageRepository):
 
     async def get_by_id(self, image_id: UUID) -> Optional[ImageMetadata]:
         try:
-            sql = f"SELECT {IMAGE_COLUMNS} FROM image_metadata WHERE id = $1"
+            sql = """SELECT id,
+            asset_id,
+            url,
+            is_main,
+            position,
+            created_at
+            FROM image_metadata WHERE id = $1"""
             row = await self.connection.fetchrow(sql, image_id)
             if row:
                 return ImageMetadata.model_validate(dict(row))
@@ -29,7 +33,13 @@ class SQLImageRepository(IImageRepository):
 
     async def list_by_asset(self, asset_id: UUID) -> List[ImageMetadata]:
         try:
-            sql = f"SELECT {IMAGE_COLUMNS} FROM image_metadata WHERE asset_id = $1 ORDER BY created_at ASC"
+            sql = """SELECT id,
+            asset_id,
+            url,
+            is_main,
+            position,
+            created_at
+            FROM image_metadata WHERE asset_id = $1 ORDER BY created_at ASC"""
             rows = await self.connection.fetch(sql, asset_id)
             return [ImageMetadata.model_validate(dict(row)) for row in rows]
         except Exception as e:
@@ -40,29 +50,26 @@ class SQLImageRepository(IImageRepository):
         try:
             image_dict = image.model_dump(exclude={"created_at"})
 
-            # Convert Pydantic HttpUrl to string
-            if "url" in image_dict:
-                image_dict["url"] = str(image_dict["url"])
-
-            # Map Enum to string for DB
-            if "position" in image_dict and hasattr(image_dict["position"], "value"):
-                image_dict["position"] = image_dict["position"].value
+            # Convert Pydantic types to basic ones that asyncpg understands
+            for key, value in image_dict.items():
+                if hasattr(value, "value") and not isinstance(value, str):  # Enums
+                    image_dict[key] = value.value
 
             columns = ", ".join(image_dict.keys())
             placeholders = ", ".join([f"${i + 1}" for i in range(len(image_dict))])
             values = list(image_dict.values())
 
             async with self.connection.transaction():
-                sql = f"INSERT INTO image_metadata ({columns}) VALUES ({placeholders}) RETURNING {IMAGE_COLUMNS}"
+                sql = f"""INSERT INTO image_metadata ({columns}) VALUES ({placeholders}) RETURNING id,
+                asset_id,
+                url,
+                is_main,
+                position,
+                created_at"""
                 row = await self.connection.fetchrow(sql, *values)
+                if not row:
+                    raise Exception("Failed to create image metadata")
                 created_image = ImageMetadata.model_validate(dict(row))
-
-                # Update gallery in assets table
-                await self.connection.execute(
-                    "UPDATE assets SET gallery = array_append(gallery, $1) WHERE id = $2",
-                    str(created_image.url),
-                    image.asset_id,
-                )
 
                 # If this is the first image, make it the main one automatically
                 count = await self.connection.fetchval(
@@ -74,7 +81,7 @@ class SQLImageRepository(IImageRepository):
                     # Refresh to get is_main = True
                     created_image = await self.get_by_id(created_image.id)
                 if not created_image:
-                    raise Exception("Failed to create image metadata")
+                    raise Exception("Failed to refresh image metadata")
                 return created_image
         except Exception as e:
             logger.error(f"Error creating image metadata: {e}")
@@ -87,14 +94,7 @@ class SQLImageRepository(IImageRepository):
                 return False
 
             async with self.connection.transaction():
-                # Remove from gallery in assets table
-                await self.connection.execute(
-                    "UPDATE assets SET gallery = array_remove(gallery, $1) WHERE id = $2",
-                    str(image.url),
-                    image.asset_id,
-                )
-
-                # If it was the main image, pick another one or set to NULL
+                # If it was the main image, pick another one or set to empty
                 if image.is_main:
                     await self.connection.execute(
                         "UPDATE assets SET main_image = '' WHERE id = $1",
@@ -118,14 +118,14 @@ class SQLImageRepository(IImageRepository):
 
     async def set_main_image(self, asset_id: UUID, image_id: UUID) -> bool:
         try:
-            # 1. Start a transaction within the current connection
+            # Start a transaction within the current connection
             async with self.connection.transaction():
-                # 2. Reset all images for this asset to not-main
+                # Reset all images for this asset to not-main
                 await self.connection.execute(
                     "UPDATE image_metadata SET is_main = FALSE WHERE asset_id = $1",
                     asset_id,
                 )
-                # 3. Set the specific image as main
+                # Set the specific image as main
                 result = await self.connection.execute(
                     "UPDATE image_metadata SET is_main = TRUE WHERE id = $1 AND asset_id = $2",
                     image_id,

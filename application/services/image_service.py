@@ -27,11 +27,8 @@ class ImageService:
         self,
         asset_id: UUID,
         file: UploadFile,
-        name: str,
-        alt_text: Optional[str] = None,
         is_main: bool = False,
         position: Optional[str] = "OTHERS",
-        **extra_metadata,
     ) -> ImageMetadata:
         """
         Validates, saves the file locally, and stores metadata in the database.
@@ -52,6 +49,7 @@ class ImageService:
                 norm_position = position.upper().replace(" ", "_")
                 # Basic check if it's a valid position, otherwise fallback to OTHERS
                 from domain.enums import ImagePosition
+
                 try:
                     ImagePosition(norm_position)
                 except ValueError:
@@ -75,20 +73,12 @@ class ImageService:
             # The URL should be relative for the static file route mount
             url = f"/images/{filename}"
 
-            # Get file size
-            size = os.path.getsize(file_path)
-
             image = ImageMetadata(
                 id=uuid4(),
                 asset_id=asset_id,
                 url=url,
-                name=name,
-                alt_text=alt_text,
                 is_main=False,  # Always create as False initially to avoid DB constraint violation
-                content_type=file.content_type,
-                size=size,
                 position=norm_position,
-                **extra_metadata,
             )
 
             created_image: ImageMetadata | None = await self.image_repo.create(image)
@@ -140,7 +130,7 @@ class ImageService:
             deleted = await self.image_repo.delete(image_id)
 
             # If deleted from DB, remove the physical file
-            if deleted and image.url.startswith("/uploads/"):
+            if deleted and image.url.startswith("/images/"):
                 filename = image.url.split("/")[-1]
                 file_path = os.path.join(settings.UPLOAD_DIR, filename)
                 if os.path.exists(file_path):
@@ -155,17 +145,3 @@ class ImageService:
             raise
         except Exception as e:
             raise InfrastructureServiceException("Failed to delete image") from e
-
-    async def update_metadata(
-        self, image_id: UUID, metadata: dict
-    ) -> Optional[ImageMetadata]:
-        try:
-            return await self.image_repo.update(image_id, metadata)
-        except ServiceException:
-            raise
-        except ValueError as e:
-            raise ValidationServiceException(str(e)) from e
-        except Exception as e:
-            raise InfrastructureServiceException(
-                "Failed to update image metadata"
-            ) from e

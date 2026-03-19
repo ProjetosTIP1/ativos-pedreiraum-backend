@@ -9,6 +9,21 @@ class BaseEntity(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+# Placeholder entities for future implementation
+class Branch(BaseEntity):
+    id: int
+    name: str
+    location: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.now)
+
+
+class AppConfig(BaseEntity):
+    id: int
+    key: str
+    value: str
+    created_at: datetime = Field(default_factory=datetime.now)
+
+
 class User(BaseEntity):
     id: UUID = Field(default_factory=uuid4)
     email: str = Field(..., regex=r"^[\w\.-]+@[\w\.-]+\.\w+$")
@@ -27,18 +42,19 @@ class UserCreateRequest(BaseModel):
 
 
 class Category(BaseEntity):
-    id: UUID = Field(default_factory=uuid4)
-    name: str = Field(..., min_length=2, max_length=50)
+    id: int
+    name: str = Field(..., min_length=2, max_length=100)
+    created_at: datetime = Field(default_factory=datetime.now)
 
 
 class CategoryCreateRequest(BaseModel):
-    name: str = Field(..., min_length=2, max_length=50)
+    name: str = Field(..., min_length=2, max_length=100)
 
 
 class ImageMetadata(BaseEntity):
     id: UUID = Field(default_factory=uuid4)
     asset_id: UUID = Field(..., description="ID of the associated asset")
-    url: str = Field(..., min_length=5, max_length=255)
+    url: str = Field(..., min_length=5)
     is_main: bool = Field(default=False)
     position: ImagePosition = ImagePosition.OTHERS
     created_at: datetime = Field(default_factory=datetime.now)
@@ -46,7 +62,6 @@ class ImageMetadata(BaseEntity):
 
 class ImageUploadRequest(BaseModel):
     asset_id: UUID = Field(..., description="ID of the associated asset")
-    url: str = Field(..., min_length=5, max_length=255)
     is_main: bool = Field(default=False)
     position: ImagePosition = ImagePosition.OTHERS
 

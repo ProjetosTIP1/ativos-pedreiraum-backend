@@ -4,8 +4,6 @@ from domain.entities import Category
 from domain.interfaces import ICategoryRepository
 from core.helpers.logger_helper import logger
 
-CATEGORY_COLUMNS = "id, name, slug, parent_id"
-
 
 class SQLCategoryRepository(ICategoryRepository):
     def __init__(self, connection: asyncpg.Connection):
@@ -17,7 +15,10 @@ class SQLCategoryRepository(ICategoryRepository):
 
     async def list_all(self) -> List[Category]:
         try:
-            query = f"SELECT {CATEGORY_COLUMNS} FROM categories ORDER BY name"
+            query = """SELECT id,
+            name,
+            created_at
+            FROM categories ORDER BY name"""
             rows = await self.connection.fetch(query)
             return [Category.model_validate(dict(row)) for row in rows]
         except Exception as e:
@@ -26,7 +27,10 @@ class SQLCategoryRepository(ICategoryRepository):
 
     async def get_by_id(self, category_id: int) -> Optional[Category]:
         try:
-            query = f"SELECT {CATEGORY_COLUMNS} FROM categories WHERE id = $1"
+            query = """SELECT id,
+            name,
+            created_at
+            FROM categories WHERE id = $1"""
             row = await self.connection.fetchrow(query, category_id)
             if row:
                 return Category.model_validate(dict(row))
