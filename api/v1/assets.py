@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends, Query, HTTPException
 from core.database import get_db_connection
 from infrastructure.repositories.asset_repository import SQLAssetRepository
 from infrastructure.repositories.category_repository import SQLCategoryRepository
+from infrastructure.repositories.image_repository import SQLImageRepository
+from application.services.image_service import ImageService
 from application.services.asset_service import AssetService
 from domain.entities import Asset
 from domain.enums import AssetCategory
@@ -17,7 +19,9 @@ async def get_asset_service(
 ) -> AssetService:
     asset_repo = SQLAssetRepository(conn)
     category_repo = SQLCategoryRepository(conn)
-    return AssetService(asset_repo, category_repo)
+    image_repo = SQLImageRepository(conn)
+    image_service = ImageService(image_repo)
+    return AssetService(asset_repo, category_repo, image_service)
 
 
 @router.get("/", response_model=List[Asset])

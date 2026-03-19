@@ -5,7 +5,7 @@ from domain.entities import ImageMetadata
 from domain.interfaces import IImageRepository
 from core.helpers.logger_helper import logger
 
-IMAGE_COLUMNS = "id, asset_id, url, name, alt_text, content_type, size, width, height, is_main, created_at"
+IMAGE_COLUMNS = "id, asset_id, url, name, alt_text, content_type, size, width, height, is_main, position, created_at"
 
 
 class SQLImageRepository(IImageRepository):
@@ -44,42 +44,74 @@ class SQLImageRepository(IImageRepository):
             if "url" in image_dict:
                 image_dict["url"] = str(image_dict["url"])
 
+            # Map Enum to string for DB
+            if "position" in image_dict and hasattr(image_dict["position"], "value"):
+                image_dict["position"] = image_dict["position"].value
+
             columns = ", ".join(image_dict.keys())
             placeholders = ", ".join([f"${i + 1}" for i in range(len(image_dict))])
             values = list(image_dict.values())
 
-            sql = f"INSERT INTO image_metadata ({columns}) VALUES ({placeholders}) RETURNING {IMAGE_COLUMNS}"
-            row = await self.connection.fetchrow(sql, *values)
-            return ImageMetadata.model_validate(dict(row))
+            async with self.connection.transaction():
+                sql = f"INSERT INTO image_metadata ({columns}) VALUES ({placeholders}) RETURNING {IMAGE_COLUMNS}"
+                row = await self.connection.fetchrow(sql, *values)
+                created_image = ImageMetadata.model_validate(dict(row))
+
+                # Update gallery in assets table
+                await self.connection.execute(
+                    "UPDATE assets SET gallery = array_append(gallery, $1) WHERE id = $2",
+                    str(created_image.url),
+                    image.asset_id,
+                )
+
+                # If this is the first image, make it the main one automatically
+                count = await self.connection.fetchval(
+                    "SELECT COUNT(*) FROM image_metadata WHERE asset_id = $1",
+                    image.asset_id,
+                )
+                if count == 1:
+                    await self.set_main_image(image.asset_id, created_image.id)
+                    # Refresh to get is_main = True
+                    created_image = await self.get_by_id(created_image.id)
+                if not created_image:
+                    raise Exception("Failed to create image metadata")
+                return created_image
         except Exception as e:
             logger.error(f"Error creating image metadata: {e}")
             raise
 
-    async def update(self, image_id: UUID, image_data: dict) -> Optional[ImageMetadata]:
-        try:
-            if not image_data:
-                return await self.get_by_id(image_id)
-
-            set_clauses = [f"{k} = ${i + 1}" for i, k in enumerate(image_data.keys())]
-            values = list(image_data.values())
-
-            idx = len(values) + 1
-            sql = f"UPDATE image_metadata SET {', '.join(set_clauses)} WHERE id = ${idx} RETURNING {IMAGE_COLUMNS}"
-            values.append(image_id)
-
-            row = await self.connection.fetchrow(sql, *values)
-            if row:
-                return ImageMetadata.model_validate(dict(row))
-            return None
-        except Exception as e:
-            logger.error(f"Error updating image metadata {image_id}: {e}")
-            raise
-
     async def delete(self, image_id: UUID) -> bool:
         try:
-            sql = "DELETE FROM image_metadata WHERE id = $1"
-            result = await self.connection.execute(sql, image_id)
-            return result == "DELETE 1"
+            image = await self.get_by_id(image_id)
+            if not image:
+                return False
+
+            async with self.connection.transaction():
+                # Remove from gallery in assets table
+                await self.connection.execute(
+                    "UPDATE assets SET gallery = array_remove(gallery, $1) WHERE id = $2",
+                    str(image.url),
+                    image.asset_id,
+                )
+
+                # If it was the main image, pick another one or set to NULL
+                if image.is_main:
+                    await self.connection.execute(
+                        "UPDATE assets SET main_image = '' WHERE id = $1",
+                        image.asset_id,
+                    )
+                    # Try to find another image to be main
+                    next_image = await self.connection.fetchrow(
+                        "SELECT id FROM image_metadata WHERE asset_id = $1 AND id != $2 LIMIT 1",
+                        image.asset_id,
+                        image_id,
+                    )
+                    if next_image:
+                        await self.set_main_image(image.asset_id, next_image["id"])
+
+                sql = "DELETE FROM image_metadata WHERE id = $1"
+                result = await self.connection.execute(sql, image_id)
+                return result == "DELETE 1"
         except Exception as e:
             logger.error(f"Error deleting image metadata {image_id}: {e}")
             raise

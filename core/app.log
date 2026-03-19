@@ -65,3 +65,16 @@ asset_id
 name
   Field required [type=missing, input_value={'filename': 'cb158e28efb...-03-17T16:43:12.090069'}, input_type=dict]
     For further information visit https://errors.pydantic.dev/2.12/v/missing 
+2026-03-19 09:27:41 |  | ERROR  Database connection error: Can't instantiate abstract class SQLImageRepository without an implementation for abstract method 'update' 
+2026-03-19 09:27:41 |  | ERROR  Database connection error: Can't instantiate abstract class SQLImageRepository without an implementation for abstract method 'update' 
+2026-03-19 09:27:47 |  | ERROR  Database connection error: Can't instantiate abstract class SQLImageRepository without an implementation for abstract method 'update' 
+2026-03-19 09:27:47 |  | ERROR  Database connection error: Can't instantiate abstract class SQLImageRepository without an implementation for abstract method 'update' 
+2026-03-19 09:28:07 |  | ERROR  Database connection error: Can't instantiate abstract class SQLImageRepository without an implementation for abstract method 'update' 
+2026-03-19 09:28:07 |  | ERROR  Database connection error: Can't instantiate abstract class SQLImageRepository without an implementation for abstract method 'update' 
+2026-03-19 09:28:36 |  | ERROR  Database connection error: Can't instantiate abstract class SQLImageRepository without an implementation for abstract method 'update' 
+2026-03-19 09:28:36 |  | ERROR  Database connection error: Can't instantiate abstract class SQLImageRepository without an implementation for abstract method 'update' 
+2026-03-19 09:28:57 |  | ERROR  Database connection error: Can't instantiate abstract class SQLImageRepository without an implementation for abstract method 'update' 
+2026-03-19 09:29:17 |  | ERROR  Database connection error: Can't instantiate abstract class SQLImageRepository without an implementation for abstract method 'update' 
+2026-03-19 09:29:29 |  | ERROR  Database connection error: Can't instantiate abstract class SQLImageRepository without an implementation for abstract method 'update' 
+2026-03-19 09:30:48 |  | ERROR  Database connection error: Can't instantiate abstract class SQLImageRepository without an implementation for abstract method 'update' 
+2026-03-19 09:31:33 |  | ERROR  Database connection error: Can't instantiate abstract class SQLImageRepository without an implementation for abstract method 'update' 

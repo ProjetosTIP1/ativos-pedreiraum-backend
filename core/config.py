@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
 
     # Local Storage
-    UPLOAD_DIR: str = Field(default="uploads")
+    UPLOAD_DIR: str = Field(default="images")
 
     # Application
     APP_NAME: str = "Valemix Assets Catalog"

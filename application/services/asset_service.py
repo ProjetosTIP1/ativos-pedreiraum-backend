@@ -11,13 +11,20 @@ from core.helpers.exceptions_helper import (
 )
 
 
+from application.services.image_service import ImageService
+
+
 class AssetService:
     def __init__(
-        self, asset_repo: IAssetRepository, category_repo: ICategoryRepository
+        self,
+        asset_repo: IAssetRepository,
+        category_repo: ICategoryRepository,
+        image_service: Optional[ImageService] = None,
     ):
         try:
             self.asset_repo = asset_repo
             self.category_repo = category_repo
+            self.image_service = image_service
         except Exception as e:
             raise InfrastructureServiceException(
                 "Failed to initialize asset service"
@@ -96,8 +103,14 @@ class AssetService:
                 return False
 
             # Business Rule: No asset can be deleted if it has "RESERVED" status
-            if asset.status == "RESERVED":
+            if asset.status == AssetStatus.RESERVED:
                 raise ValidationServiceException("Cannot delete a reserved asset.")
+
+            # Delete all associated images (files and metadata)
+            if self.image_service:
+                images = await self.image_service.get_asset_images(asset_id)
+                for img in images:
+                    await self.image_service.delete_image(img.id)
 
             return await self.asset_repo.delete(asset_id)
         except ServiceException:

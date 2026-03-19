@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS image_metadata (
     width INTEGER,
     height INTEGER,
     is_main BOOLEAN DEFAULT FALSE,
-    position INTEGER DEFAULT 0,
+    position TEXT DEFAULT 'OTHERS',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -34,3 +34,15 @@ class PartState(str, Enum):
     NEW = "NEW"
     REFURBISHED = "REFURBISHED"
     USED = "USED"
+
+
+class ImagePosition(str, Enum):
+    FRONT = "FRONT"
+    BACK = "BACK"
+    SIDE_LEFT = "SIDE_LEFT"
+    SIDE_RIGHT = "SIDE_RIGHT"
+    INTERIOR = "INTERIOR"
+    ENGINE = "ENGINE"
+    TIRE = "TIRE"
+    DASHBOARD = "DASHBOARD"
+    OTHERS = "OTHERS"

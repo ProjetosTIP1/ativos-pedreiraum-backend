@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Optional, Union, Annotated
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field, ConfigDict, field_validator
-from .enums import AssetStatus, AssetCondition, AssetCategory, PartState, UserRole
+from .enums import AssetStatus, AssetCondition, AssetCategory, PartState, UserRole, ImagePosition
 
 
 class BaseEntity(BaseModel):
@@ -77,6 +77,7 @@ class ImageMetadata(BaseEntity):
     width: Optional[int] = None
     height: Optional[int] = None
     is_main: bool = False
+    position: ImagePosition = ImagePosition.OTHERS
     created_at: datetime = Field(default_factory=datetime.now)
 
 

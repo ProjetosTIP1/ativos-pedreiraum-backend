@@ -30,6 +30,7 @@ class ImageService:
         name: str,
         alt_text: Optional[str] = None,
         is_main: bool = False,
+        position: Optional[str] = "OTHERS",
         **extra_metadata,
     ) -> ImageMetadata:
         """
@@ -44,6 +45,17 @@ class ImageService:
                 raise ValidationServiceException(
                     f"Invalid file type. Allowed: {allowed_extensions}"
                 )
+
+            # Normalize position to match Enum
+            norm_position = "OTHERS"
+            if position:
+                norm_position = position.upper().replace(" ", "_")
+                # Basic check if it's a valid position, otherwise fallback to OTHERS
+                from domain.enums import ImagePosition
+                try:
+                    ImagePosition(norm_position)
+                except ValueError:
+                    norm_position = "OTHERS"
 
             # 2. Generate secure random filename
             filename = f"{uuid4().hex}{ext}"
@@ -61,7 +73,7 @@ class ImageService:
 
             # 4. Determine URL and save metadata
             # The URL should be relative for the static file route mount
-            url = f"/uploads/{filename}"
+            url = f"/images/{filename}"
 
             # Get file size
             size = os.path.getsize(file_path)
@@ -75,6 +87,7 @@ class ImageService:
                 is_main=False,  # Always create as False initially to avoid DB constraint violation
                 content_type=file.content_type,
                 size=size,
+                position=norm_position,
                 **extra_metadata,
             )
 
