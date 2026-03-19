@@ -41,7 +41,6 @@ async def list_assets(
             brand=brand,
             min_year=min_year,
             max_year=max_year,
-            query=q,
             limit=limit,
             offset=offset,
         )

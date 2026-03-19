@@ -26,7 +26,7 @@ class AppConfig(BaseEntity):
 
 class User(BaseEntity):
     id: UUID = Field(default_factory=uuid4)
-    email: str = Field(..., regex=r"^[\w\.-]+@[\w\.-]+\.\w+$")
+    email: str = Field(...)
     full_name: str = Field(..., min_length=2, max_length=100)
     contact: str = Field(..., min_length=10, max_length=20)
     role: UserRole = UserRole.REGULAR
@@ -34,7 +34,7 @@ class User(BaseEntity):
 
 
 class UserCreateRequest(BaseModel):
-    email: str = Field(..., regex=r"^[\w\.-]+@[\w\.-]+\.\w+$")
+    email: str = Field(...)
     full_name: str = Field(..., min_length=2, max_length=100)
     contact: str = Field(..., min_length=10, max_length=20)
     password: str = Field(..., min_length=8)

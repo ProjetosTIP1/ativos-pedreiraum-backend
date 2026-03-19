@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 from uuid import UUID
-from .entities import Asset, Category, AppConfig, User, Branch, ImageMetadata
+from .entities import Asset, CreateAssetRequest, UpdateAssetRequest, Category, AppConfig, User, Branch, ImageMetadata
 from .enums import AssetCategory, AssetStatus
 
 
@@ -21,9 +21,7 @@ class IAssetRepository(ABC):
         brand: Optional[str] = None,
         min_year: Optional[int] = None,
         max_year: Optional[int] = None,
-        branch_id: Optional[int] = None,
         status: Optional[AssetStatus] = None,
-        query: Optional[str] = None,
         limit: int = 20,
         offset: int = 0,
     ) -> List[Asset]:
@@ -34,11 +32,11 @@ class IAssetRepository(ABC):
         pass
 
     @abstractmethod
-    async def create(self, asset: Asset) -> Asset:
+    async def create(self, asset: CreateAssetRequest) -> Asset:
         pass
 
     @abstractmethod
-    async def update(self, asset_id: UUID, asset_data: dict) -> Optional[Asset]:
+    async def update(self, asset_id: UUID, asset_data: UpdateAssetRequest) -> Optional[Asset]:
         pass
 
     @abstractmethod

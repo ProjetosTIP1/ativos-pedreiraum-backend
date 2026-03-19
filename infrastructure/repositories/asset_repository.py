@@ -116,7 +116,11 @@ class SQLAssetRepository(IAssetRepository):
                 values.append(status.value)
                 idx += 1
 
-            where_clause = "WHERE " + " AND ".join(filters) if filters else ""
+            # Always include base conditions
+            filters.append("is_active = TRUE")
+            filters.append("deleted_at IS NULL")
+            
+            where_clause = "WHERE " + " AND ".join(filters)
             sql = f"""SELECT id,
                       name,
                       category,
@@ -138,7 +142,7 @@ class SQLAssetRepository(IAssetRepository):
                       specifications,
                       created_at,
                       updated_at
-                      FROM assets {where_clause} AND is_active = TRUE AND deleted_at IS NULL ORDER BY created_at DESC LIMIT ${idx} OFFSET ${idx + 1}"""
+                      FROM assets {where_clause} ORDER BY created_at DESC LIMIT ${idx} OFFSET ${idx + 1}"""
             values.extend([limit, offset])
 
             rows = await self.connection.fetch(sql, *values)
