@@ -91,3 +91,11 @@ name
 2026-03-19 16:11:55 |  | ERROR  Database connection error: 500: {'message': 'Failed to list assets', 'code': 'infrastructure_error'} 
 2026-03-19 16:13:29 |  | ERROR  Error fetching featured assets: coluna "is_featured" não existe 
 2026-03-19 16:13:29 |  | ERROR  Database connection error: 500: {'message': 'Failed to fetch featured assets', 'code': 'infrastructure_error'} 
+2026-03-19 16:28:26 |  | ERROR  Error fetching asset by ID: invalid input for query argument $1: '1' (invalid UUID '1': length must be between 32..36 characters, got 1) 
+2026-03-19 16:28:26 |  | ERROR  Database connection error: 500: {'message': 'Failed to fetch asset by ID', 'code': 'infrastructure_error'} 
+2026-03-19 16:28:32 |  | ERROR  Error fetching asset by ID: invalid input for query argument $1: '132eaqwdqwqw' (invalid UUID '132eaqwdqwqw': length must be between 32..36 characters, got 12) 
+2026-03-19 16:28:32 |  | ERROR  Database connection error: 500: {'message': 'Failed to fetch asset by ID', 'code': 'infrastructure_error'} 
+2026-03-19 16:28:39 |  | ERROR  Error fetching asset by ID: invalid input for query argument $1: '132eaqwdqwqwqwdqwdqwdqwdqwdqwd' (invalid UUID '132eaqwdqwqwqwdqwdqwdqwdqwdqwd': length must be between 32..36 characters, got 30) 
+2026-03-19 16:28:39 |  | ERROR  Database connection error: 500: {'message': 'Failed to fetch asset by ID', 'code': 'infrastructure_error'} 
+2026-03-19 16:28:44 |  | ERROR  Error fetching asset by ID: invalid input for query argument $1: '132eaqwdqwqwqwdqwdqwdqwdqwdqwwwd' (invalid UUID '132eaqwdqwqwqwdqwdqwdqwdqwdqwwwd': unexpected character 'q') 
+2026-03-19 16:28:44 |  | ERROR  Database connection error: 500: {'message': 'Failed to fetch asset by ID', 'code': 'infrastructure_error'} 

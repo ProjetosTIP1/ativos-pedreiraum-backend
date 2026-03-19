@@ -68,10 +68,10 @@ async def get_highlights(service: AssetService = Depends(get_asset_service)):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.get("/{slug}", response_model=Asset)
-async def get_asset(slug: str, service: AssetService = Depends(get_asset_service)):
+@router.get("/{id}", response_model=Asset)
+async def get_asset(id: str, service: AssetService = Depends(get_asset_service)):
     try:
-        asset = await service.get_asset_by_slug(slug)
+        asset = await service.get_asset_by_id(id)
         if not asset:
             raise HTTPException(status_code=404, detail="Asset not found")
         return asset
