@@ -22,7 +22,6 @@ class SQLUserRepository(IUserRepository):
             full_name,
             contact,
             role,
-            hashed_password,
             created_at
             FROM users WHERE id = $1"""
             row = await self.connection.fetchrow(query, user_id)
@@ -40,7 +39,6 @@ class SQLUserRepository(IUserRepository):
             full_name,
             contact,
             role,
-            hashed_password,
             created_at
             FROM users WHERE email = $1"""
             row = await self.connection.fetchrow(query, email)
@@ -51,6 +49,17 @@ class SQLUserRepository(IUserRepository):
             logger.error(f"Error fetching user by email {email}: {e}")
             raise
 
+    async def get_password_hash_by_email(self, email: str) -> Optional[str]:
+        try:
+            query = """SELECT hashed_password FROM users WHERE email = $1"""
+            row = await self.connection.fetchrow(query, email)
+            if row:
+                return row["hashed_password"]
+            return None
+        except Exception as e:
+            logger.error(f"Error fetching password hash for email {email}: {e}")
+            raise
+
     async def list_all(self) -> List[User]:
         try:
             query = """SELECT id,
@@ -58,7 +67,6 @@ class SQLUserRepository(IUserRepository):
             full_name,
             contact,
             role,
-            hashed_password,
             created_at
             FROM users ORDER BY created_at DESC"""
             rows = await self.connection.fetch(query)
@@ -86,7 +94,6 @@ class SQLUserRepository(IUserRepository):
             full_name,
             contact,
             role,
-            hashed_password,
             created_at"""
             row = await self.connection.fetchrow(sql, *values)
             if not row:
@@ -116,12 +123,11 @@ class SQLUserRepository(IUserRepository):
                 values.append(v)
 
             idx = len(values) + 1
-            sql = f"""UPDATE users SET {', '.join(set_clauses)} WHERE id = ${idx} RETURNING id,
+            sql = f"""UPDATE users SET {", ".join(set_clauses)} WHERE id = ${idx} RETURNING id,
             email,
             full_name,
             contact,
             role,
-            hashed_password,
             created_at"""
             values.append(user_id)
 

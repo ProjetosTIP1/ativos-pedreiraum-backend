@@ -79,12 +79,15 @@ class UserService:
 
     async def authenticate_user(self, email: str, password: str) -> Optional[User]:
         try:
-            user = await self.user_repo.get_by_email(email)
-            if not user:
+            # First check if user exists and get password hash
+            password_hash = await self.user_repo.get_password_hash_by_email(email)
+            if not password_hash:
                 return None
-            if not await self.verify_password(password, user.hashed_password):
+            # Verify password
+            if not await self.verify_password(password, password_hash):
                 return None
-            return user
+            # Only fetch full user data if authentication succeeds
+            return await self.user_repo.get_by_email(email)
         except ServiceException:
             raise
         except Exception as e:

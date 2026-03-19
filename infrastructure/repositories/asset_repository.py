@@ -229,7 +229,9 @@ class SQLAssetRepository(IAssetRepository):
             logger.error(f"Error creating asset: {e}")
             raise
 
-    async def update(self, asset_id: UUID, asset_data: UpdateAssetRequest) -> Optional[Asset]:
+    async def update(
+        self, asset_id: UUID, asset_data: UpdateAssetRequest
+    ) -> Optional[Asset]:
         try:
             if not asset_data:
                 return await self.get_by_id(asset_id)
@@ -245,7 +247,7 @@ class SQLAssetRepository(IAssetRepository):
                 values.append(v)
 
             idx = len(values) + 1
-            sql = f"""UPDATE assets SET {', '.join(set_clauses)}, updated_at = CURRENT_TIMESTAMP WHERE id = ${idx} RETURNING id,
+            sql = f"""UPDATE assets SET {", ".join(set_clauses)}, updated_at = CURRENT_TIMESTAMP WHERE id = ${idx} RETURNING id,
             name,
             category,
             subcategory,

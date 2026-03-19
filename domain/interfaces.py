@@ -70,6 +70,10 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
+    async def get_password_hash_by_email(self, email: str) -> Optional[str]:
+        pass
+
+    @abstractmethod
     async def list_all(self) -> List[User]:
         pass
 

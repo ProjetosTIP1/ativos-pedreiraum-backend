@@ -79,7 +79,9 @@ class AssetService:
         except Exception as e:
             raise InfrastructureServiceException("Failed to create asset") from e
 
-    async def update_asset(self, asset_id: UUID, asset_data: UpdateAssetRequest) -> Optional[Asset]:
+    async def update_asset(
+        self, asset_id: UUID, asset_data: UpdateAssetRequest
+    ) -> Optional[Asset]:
         try:
             # Business Rule: No asset can be deleted or potentially modified if it has "RESERVED" status
             # (simplified check, usually depends on what's being modified)

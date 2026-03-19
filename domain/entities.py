@@ -30,7 +30,6 @@ class User(BaseEntity):
     full_name: str = Field(..., min_length=2, max_length=100)
     contact: str = Field(..., min_length=10, max_length=20)
     role: UserRole = UserRole.REGULAR
-    hashed_password: str = Field(..., min_length=60, max_length=60)  # Assuming bcrypt hash
     created_at: datetime = Field(default_factory=datetime.now)
 
 
@@ -83,8 +82,12 @@ class Asset(BaseEntity):
     main_image: str = Field(..., min_length=5, max_length=255)
     highlighted: bool = Field(default=False)
     view_count: int = Field(default=0)
-    created_by_user_id: Optional[UUID] = Field(None, description="ID of the user who created the asset")
-    specifications: Optional[dict] = Field(None, description="Polymorphic specifications stored in JSONB")
+    created_by_user_id: Optional[UUID] = Field(
+        None, description="ID of the user who created the asset"
+    )
+    specifications: Optional[dict] = Field(
+        None, description="Polymorphic specifications stored in JSONB"
+    )
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
@@ -98,15 +101,23 @@ class CreateAssetRequest(BaseModel):
     year: int = Field(..., ge=1900, le=datetime.now().year + 1)
     serial_number: str = Field(..., min_length=2, max_length=50)
     location: str = Field(..., min_length=2, max_length=100)
-    status: Optional[AssetStatus] = Field(AssetStatus.PENDING, description="Status of the asset")
+    status: Optional[AssetStatus] = Field(
+        AssetStatus.PENDING, description="Status of the asset"
+    )
     condition: AssetCondition
     price: Optional[float] = Field(None, ge=0)
     description: str = Field(..., min_length=10, max_length=1000)
-    rep_contact: Optional[str] = Field(None, min_length=10, max_length=20, description="Whatsapp contact for the asset")
+    rep_contact: Optional[str] = Field(
+        None, min_length=10, max_length=20, description="Whatsapp contact for the asset"
+    )
     main_image: str = Field(..., min_length=5, max_length=255)
     view_count: Optional[int] = Field(default=0)
-    specifications: Optional[dict] = Field(None, description="Polymorphic specifications stored in JSONB")
-    created_by_user_id: UUID = Field(..., description="ID of the user who created the asset")
+    specifications: Optional[dict] = Field(
+        None, description="Polymorphic specifications stored in JSONB"
+    )
+    created_by_user_id: UUID = Field(
+        ..., description="ID of the user who created the asset"
+    )
 
 
 class UpdateAssetRequest(BaseModel):
@@ -123,7 +134,11 @@ class UpdateAssetRequest(BaseModel):
     condition: Optional[AssetCondition]
     price: Optional[float] = Field(None, ge=0)
     description: Optional[str] = Field(None, min_length=10, max_length=1000)
-    rep_contact: Optional[str] = Field(None, min_length=10, max_length=20, description="Whatsapp contact for the asset")
+    rep_contact: Optional[str] = Field(
+        None, min_length=10, max_length=20, description="Whatsapp contact for the asset"
+    )
     main_image: Optional[str] = Field(None, min_length=5, max_length=255)
     highlighted: Optional[bool] = Field(None)
-    specifications: Optional[dict] = Field(None, description="Polymorphic specifications stored in JSONB")
+    specifications: Optional[dict] = Field(
+        None, description="Polymorphic specifications stored in JSONB"
+    )
