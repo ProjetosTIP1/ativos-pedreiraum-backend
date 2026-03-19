@@ -69,8 +69,9 @@ class Asset(BaseEntity):
     highlighted: bool = Field(default=False)
     view_count: int = Field(default=0)
     created_by_user_id: Optional[UUID] = Field(None, description="ID of the user who created the asset")
-    created_at: datetime = Field(default_factory=datetime.now)
     specifications: Optional[dict] = Field(None, description="Polymorphic specifications stored in JSONB")
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
 
 
 class CreateAssetRequest(BaseModel):
@@ -91,3 +92,23 @@ class CreateAssetRequest(BaseModel):
     view_count: Optional[int] = Field(default=0)
     specifications: Optional[dict] = Field(None, description="Polymorphic specifications stored in JSONB")
     created_by_user_id: UUID = Field(..., description="ID of the user who created the asset")
+
+
+class UpdateAssetRequest(BaseModel):
+    id: UUID = Field(..., description="ID of the asset to update")
+    name: Optional[str] = Field(None, min_length=2, max_length=100)
+    category: Optional[AssetCategory]
+    subcategory: Optional[str] = Field(None, min_length=2, max_length=50)
+    brand: Optional[str] = Field(None, min_length=2, max_length=50)
+    model: Optional[str] = Field(None, min_length=2, max_length=50)
+    year: Optional[int] = Field(None, ge=1900, le=datetime.now().year + 1)
+    serial_number: Optional[str] = Field(None, min_length=2, max_length=50)
+    location: Optional[str] = Field(None, min_length=2, max_length=100)
+    status: Optional[AssetStatus] = Field(None, description="Status of the asset")
+    condition: Optional[AssetCondition]
+    price: Optional[float] = Field(None, ge=0)
+    description: Optional[str] = Field(None, min_length=10, max_length=1000)
+    rep_contact: Optional[str] = Field(None, min_length=10, max_length=20, description="Whatsapp contact for the asset")
+    main_image: Optional[str] = Field(None, min_length=5, max_length=255)
+    highlighted: Optional[bool] = Field(None)
+    specifications: Optional[dict] = Field(None, description="Polymorphic specifications stored in JSONB")

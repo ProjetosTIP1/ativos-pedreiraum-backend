@@ -7,7 +7,7 @@ from core.database import get_db_connection
 from infrastructure.repositories.asset_repository import SQLAssetRepository
 from application.services.asset_service import AssetService
 from application.services.asset_approval_service import AssetApprovalService
-from domain.entities import Asset, User
+from domain.entities import Asset, CreateAssetRequest, UpdateAssetRequest, User
 from core.helpers.exceptions_helper import ServiceException, to_http_exception
 
 router = APIRouter(prefix="/admin/assets", tags=["Admin Assets"])
@@ -22,7 +22,7 @@ async def get_approval_service(
 
 @router.post("/", response_model=Asset, status_code=status.HTTP_201_CREATED)
 async def create_asset(
-    asset_data: dict,
+    asset_data: CreateAssetRequest,
     current_user: User = Depends(get_current_admin),
     service: AssetService = Depends(get_asset_service),
 ):
@@ -85,7 +85,7 @@ async def reject_asset(
 @router.patch("/{asset_id}", response_model=Asset)
 async def update_asset(
     asset_id: UUID,
-    asset_data: dict,
+    asset_data: UpdateAssetRequest,
     _current_admin: User = Depends(get_current_admin),
     service: AssetService = Depends(get_asset_service),
 ):
