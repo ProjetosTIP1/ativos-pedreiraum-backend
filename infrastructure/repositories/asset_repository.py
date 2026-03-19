@@ -174,7 +174,7 @@ class SQLAssetRepository(IAssetRepository):
                       specifications,
                       created_at,
                       updated_at
-                       FROM assets WHERE is_featured = TRUE AND status = 'AVAILABLE' AND is_active = TRUE AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 5"""
+                       FROM assets WHERE highlighted = TRUE AND status = 'AVAILABLE' AND is_active = TRUE AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 5"""
             rows = await self.connection.fetch(query)
             return [Asset.model_validate(dict(row)) for row in rows]
         except Exception as e:
