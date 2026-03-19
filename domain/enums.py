@@ -1,12 +1,11 @@
 from enum import Enum
 
-
 class AssetStatus(str, Enum):
-    PENDING = "PENDING"
-    AVAILABLE = "AVAILABLE"
-    RESERVED = "RESERVED"
-    SOLD = "SOLD"
-    REJECTED = "REJECTED"
+    PENDING = "PENDENTE"
+    AVAILABLE = "DISPONÍVEL"
+    RESERVED = "RESERVADO"
+    SOLD = "VENDIDO"
+    REJECTED = "REJEITADO"
 
 
 class UserRole(str, Enum):
@@ -15,34 +14,28 @@ class UserRole(str, Enum):
 
 
 class AssetCondition(str, Enum):
-    EXCELLENT = "EXCELLENT"
-    GOOD = "GOOD"
+    EXCELLENT = "EXCELENTE"
+    GOOD = "BOM"
     REGULAR = "REGULAR"
 
 
 class AssetCategory(str, Enum):
-    TRUCKS = "TRUCKS"
-    EXCAVATORS = "EXCAVATORS"
-    CRUSHERS = "CRUSHERS"
-    GRADERS = "GRADERS"
-    PLANT = "PLANT"
-    PARTS = "PARTS"
-    OTHER = "OTHER"
-
-
-class PartState(str, Enum):
-    NEW = "NEW"
-    REFURBISHED = "REFURBISHED"
-    USED = "USED"
+    TRUCKS = "CAMINHÕES"
+    EXCAVATORS = "ESCAVADEIRAS"
+    CRUSHERS = "BRITADORES"
+    GRADERS = "MOTONIVELADORAS"
+    PLANT = "PLANTA"
+    PARTS = "PEÇAS"
+    OTHER = "OUTROS"
 
 
 class ImagePosition(str, Enum):
-    FRONT = "FRONT"
-    BACK = "BACK"
-    SIDE_LEFT = "SIDE_LEFT"
-    SIDE_RIGHT = "SIDE_RIGHT"
+    FRONT = "FRENTE"
+    BACK = "TRÁS"
+    SIDE_LEFT = "LADO_ESQUERDO"
+    SIDE_RIGHT = "LADO_DIREITO"
     INTERIOR = "INTERIOR"
-    ENGINE = "ENGINE"
-    TIRE = "TIRE"
-    DASHBOARD = "DASHBOARD"
-    OTHERS = "OTHERS"
+    ENGINE = "MOTOR"
+    TIRE = "PNEU"
+    DASHBOARD = "PAINEL"
+    OTHERS = "OUTROS"
