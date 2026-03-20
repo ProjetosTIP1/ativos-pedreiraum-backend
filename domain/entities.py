@@ -110,6 +110,7 @@ class CreateAssetRequest(BaseModel):
         None, min_length=10, max_length=20, description="Whatsapp contact for the asset"
     )
     view_count: Optional[int] = Field(default=0)
+    highlighted: Optional[bool] = Field(default=False)
     specifications: Optional[dict] = Field(
         None, description="Polymorphic specifications stored in JSONB"
     )
@@ -121,7 +122,7 @@ class CreateAssetRequest(BaseModel):
 class UpdateAssetRequest(BaseModel):
     id: Optional[UUID] = Field(None, description="ID of the asset to update")
     name: Optional[str] = Field(None, min_length=2, max_length=100)
-    category: Optional[AssetCategory]
+    category: Optional[AssetCategory] = None
     subcategory: Optional[str] = Field(None, min_length=2, max_length=50)
     brand: Optional[str] = Field(None, min_length=2, max_length=50)
     model: Optional[str] = Field(None, min_length=2, max_length=50)
@@ -129,13 +130,10 @@ class UpdateAssetRequest(BaseModel):
     serial_number: Optional[str] = Field(None, min_length=2, max_length=50)
     location: Optional[str] = Field(None, min_length=2, max_length=100)
     status: Optional[AssetStatus] = Field(None, description="Status of the asset")
-    condition: Optional[AssetCondition]
+    highlighted: Optional[bool] = Field(None)
+    condition: Optional[AssetCondition] = Field(None)
     price: Optional[float] = Field(None, ge=0)
     description: Optional[str] = Field(None, min_length=10, max_length=1000)
     rep_contact: Optional[str] = Field(
         None, min_length=10, max_length=20, description="Whatsapp contact for the asset"
-    )
-    highlighted: Optional[bool] = Field(None)
-    specifications: Optional[dict] = Field(
-        None, description="Polymorphic specifications stored in JSONB"
     )

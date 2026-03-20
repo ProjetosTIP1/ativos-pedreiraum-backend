@@ -179,7 +179,7 @@ class SQLAssetRepository(IAssetRepository):
 
     async def create(self, asset: CreateAssetRequest) -> Asset:
         try:
-            asset_dict = asset.model_dump(exclude={"created_at"})
+            asset_dict = asset.model_dump(exclude={"created_at"}, exclude_none=True)
 
             columns = ", ".join(asset_dict.keys())
             # Use $1, $2, etc. placeholders
