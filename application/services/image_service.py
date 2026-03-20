@@ -44,7 +44,7 @@ class ImageService:
                 )
 
             # Normalize position to match Enum
-            norm_position = "OTHERS"
+            norm_position = "OUTROS"
             if position:
                 norm_position = position.upper().replace(" ", "_")
                 # Basic check if it's a valid position, otherwise fallback to OTHERS
@@ -53,7 +53,7 @@ class ImageService:
                 try:
                     ImagePosition(norm_position)
                 except ValueError:
-                    norm_position = "OTHERS"
+                    norm_position = "OUTROS"
 
             # 2. Generate secure random filename
             filename = f"{uuid4().hex}{ext}"
@@ -77,8 +77,8 @@ class ImageService:
                 id=uuid4(),
                 asset_id=asset_id,
                 url=url,
-                is_main=False,  # Always create as False initially to avoid DB constraint violation
-                position=norm_position,
+                is_main=is_main,
+                position=ImagePosition(norm_position),
             )
 
             created_image: ImageMetadata | None = await self.image_repo.create(image)

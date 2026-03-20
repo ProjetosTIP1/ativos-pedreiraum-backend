@@ -132,15 +132,6 @@ class SQLImageRepository(IImageRepository):
                     asset_id,
                 )
 
-                # Also update the main_image field in the assets table for quick access
-                image = await self.get_by_id(image_id)
-                if image:
-                    await self.connection.execute(
-                        "UPDATE assets SET main_image = $1 WHERE id = $2",
-                        str(image.url),
-                        asset_id,
-                    )
-
                 return result == "UPDATE 1"
         except Exception as e:
             logger.error(

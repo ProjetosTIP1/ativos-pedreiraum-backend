@@ -266,3 +266,9 @@ status
   Input should be 'PENDENTE', 'DISPONÍVEL', 'RESERVADO', 'VENDIDO' or 'REJEITADO' [type=enum, input_value='DISPONIVEL', input_type=str]
     For further information visit https://errors.pydantic.dev/2.12/v/enum 
 2026-03-20 14:00:03 |  | ERROR  Database connection error: 500: {'message': 'Failed to fetch featured assets', 'code': 'infrastructure_error'} 
+2026-03-20 14:23:00 |  | ERROR  Error setting main image 758483ac-5989-45fd-9d82-ff4a2c8c06a8 for asset 7b32bf4b-7b4e-4436-871a-7a051b1a48bd: coluna "main_image" da relação "assets" não existe 
+2026-03-20 14:23:00 |  | ERROR  Error creating image metadata: coluna "main_image" da relação "assets" não existe 
+2026-03-20 14:23:00 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
+2026-03-20 14:31:56 |  | ERROR  Error setting main image 1e2dafbc-46a8-4a3e-9dcf-232fd0b3a944 for asset 7b32bf4b-7b4e-4436-871a-7a051b1a48bd: coluna "main_image" da relação "assets" não existe 
+2026-03-20 14:31:56 |  | ERROR  Error creating image metadata: coluna "main_image" da relação "assets" não existe 
+2026-03-20 14:31:56 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
