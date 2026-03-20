@@ -181,20 +181,6 @@ class SQLAssetRepository(IAssetRepository):
         try:
             asset_dict = asset.model_dump(exclude={"created_at"})
 
-            # Convert Pydantic types to basic ones that asyncpg understands
-            for key, value in asset_dict.items():
-                if key == "specifications" and isinstance(value, dict):
-                    import json
-
-                    asset_dict[key] = json.dumps(value)
-                elif key == "gallery" and isinstance(value, list):
-                    # Ensure all elements are strings for TEXT[]
-                    asset_dict[key] = [str(v) for v in value]
-                elif hasattr(value, "value") and not isinstance(value, str):  # Enums
-                    asset_dict[key] = value.value
-                elif hasattr(value, "__str__") and "HttpUrl" in str(type(value)):
-                    asset_dict[key] = str(value)
-
             columns = ", ".join(asset_dict.keys())
             # Use $1, $2, etc. placeholders
             placeholders = ", ".join([f"${i + 1}" for i in range(len(asset_dict))])

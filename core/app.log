@@ -239,3 +239,17 @@ name
 2026-03-20 08:32:36 |  | ERROR  Database connection error: 500: {'message': 'Failed to create asset', 'code': 'infrastructure_error'} 
 2026-03-20 08:46:35 |  | ERROR  Error creating asset: registro "new" não tem campo "search_vector" 
 2026-03-20 08:46:35 |  | ERROR  Database connection error: 500: {'message': 'Failed to create asset', 'code': 'infrastructure_error'} 
+2026-03-20 08:52:07 |  | ERROR  Error creating asset: 1 validation error for Asset
+specifications
+  Input should be a valid dictionary [type=dict_type, input_value='{"additionalProp1": {}}', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/dict_type 
+2026-03-20 08:52:07 |  | ERROR  Database connection error: 400: {'message': '1 validation error for Asset\nspecifications\n  Input should be a valid dictionary [type=dict_type, input_value=\'{"additionalProp1": {}}\', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/dict_type', 'code': 'validation_error'} 
+2026-03-20 08:54:17 |  | ERROR  Error creating asset: 1 validation error for Asset
+specifications
+  Input should be a valid dictionary [type=dict_type, input_value='{"additionalProp1": {}}', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/dict_type 
+2026-03-20 08:54:17 |  | ERROR  Database connection error: 400: {'message': '1 validation error for Asset\nspecifications\n  Input should be a valid dictionary [type=dict_type, input_value=\'{"additionalProp1": {}}\', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/dict_type', 'code': 'validation_error'} 
+2026-03-20 08:54:36 |  | ERROR  Error creating asset: invalid input for query argument $15: {'additionalProp1': {}} (expected str, got dict) 
+2026-03-20 08:54:36 |  | ERROR  Database connection error: 500: {'message': 'Failed to create asset', 'code': 'infrastructure_error'} 
+2026-03-20 08:55:45 |  | ERROR  Error creating asset: invalid input for query argument $15: {} (expected str, got dict) 
+2026-03-20 08:55:45 |  | ERROR  Database connection error: 500: {'message': 'Failed to create asset', 'code': 'infrastructure_error'} 
