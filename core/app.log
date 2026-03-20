@@ -261,3 +261,8 @@ specifications
 
   File "C:\Users\herik.rezende\Projetos\ativos-project\backend\api\v1\admin_assets.py", line 85, in update_asset
     PATCH /api/v1/admin/assets/{asset_id} 
+2026-03-20 14:00:03 |  | ERROR  Error fetching featured assets: 1 validation error for Asset
+status
+  Input should be 'PENDENTE', 'DISPONÍVEL', 'RESERVADO', 'VENDIDO' or 'REJEITADO' [type=enum, input_value='DISPONIVEL', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/enum 
+2026-03-20 14:00:03 |  | ERROR  Database connection error: 500: {'message': 'Failed to fetch featured assets', 'code': 'infrastructure_error'} 
