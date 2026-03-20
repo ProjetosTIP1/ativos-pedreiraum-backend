@@ -40,7 +40,6 @@ CREATE TABLE IF NOT EXISTS assets (
     price DECIMAL(15, 2),
     description TEXT,
     rep_contact TEXT, -- Whatsapp contact
-    main_image TEXT NOT NULL,
     highlighted BOOLEAN DEFAULT FALSE,
     view_count INTEGER DEFAULT 0,
     specifications JSONB,
@@ -62,10 +61,9 @@ CREATE TABLE IF NOT EXISTS image_metadata (
 );
 
 
--- Optimize search for alt text and names (useful for accessibility and fast lookups)
+-- Indexes for image_metadata
 CREATE INDEX IF NOT EXISTS idx_image_metadata_asset_id ON image_metadata(asset_id);
 CREATE INDEX IF NOT EXISTS idx_image_metadata_position ON image_metadata(asset_id, position);
-CREATE INDEX IF NOT EXISTS idx_image_metadata_alt_text ON image_metadata USING gin(to_tsvector('portuguese', COALESCE(alt_text, '')));
 
 -- Ensure only one main image per asset
 CREATE UNIQUE INDEX IF NOT EXISTS idx_image_metadata_only_one_main 
@@ -73,5 +71,5 @@ ON image_metadata (asset_id)
 WHERE (is_main = TRUE);
 
 
-CREATE TRIGGER assets_search_update BEFORE INSERT OR UPDATE
-ON assets FOR EACH ROW EXECUTE FUNCTION assets_search_trigger();
+-- NOTE: Full-text search trigger can be added here in the future
+-- when a search_vector column is added to the assets table.

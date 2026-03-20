@@ -38,7 +38,7 @@ class AssetService:
 
     async def get_asset_by_id(self, asset_id: str) -> Optional[Asset]:
         try:
-            return await self.asset_repo.get_by_id(asset_id)
+            return await self.asset_repo.get_by_id(UUID(asset_id))
         except ServiceException:
             raise
         except Exception as e:
@@ -70,7 +70,7 @@ class AssetService:
     ) -> Asset:
         try:
             asset_data.created_by_user_id = user_id
-            asset = Asset.model_validate(asset_data)
+            asset = CreateAssetRequest.model_validate(asset_data)
             return await self.asset_repo.create(asset)
         except ServiceException:
             raise

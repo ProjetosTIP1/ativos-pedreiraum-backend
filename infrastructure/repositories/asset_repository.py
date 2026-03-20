@@ -32,7 +32,6 @@ class SQLAssetRepository(IAssetRepository):
             price,
             description,
             rep_contact,
-            main_image,
             highlighted,
             view_count,
             created_by_user_id,
@@ -64,7 +63,6 @@ class SQLAssetRepository(IAssetRepository):
             price,
             description,
             rep_contact,
-            main_image,
             highlighted,
             view_count,
             created_by_user_id,
@@ -119,7 +117,7 @@ class SQLAssetRepository(IAssetRepository):
             # Always include base conditions
             filters.append("is_active = TRUE")
             filters.append("deleted_at IS NULL")
-            
+
             where_clause = "WHERE " + " AND ".join(filters)
             sql = f"""SELECT id,
                       name,
@@ -135,7 +133,6 @@ class SQLAssetRepository(IAssetRepository):
                       price,
                       description,
                       rep_contact,
-                      main_image,
                       highlighted,
                       view_count,
                       created_by_user_id,
@@ -167,7 +164,6 @@ class SQLAssetRepository(IAssetRepository):
                       price,
                       description,
                       rep_contact,
-                      main_image,
                       highlighted,
                       view_count,
                       created_by_user_id,
@@ -218,7 +214,6 @@ class SQLAssetRepository(IAssetRepository):
             price,
             description,
             rep_contact,
-            main_image,
             highlighted,
             view_count,
             created_by_user_id,
@@ -265,7 +260,6 @@ class SQLAssetRepository(IAssetRepository):
             price,
             description,
             rep_contact,
-            main_image,
             highlighted,
             view_count,
             created_by_user_id,
