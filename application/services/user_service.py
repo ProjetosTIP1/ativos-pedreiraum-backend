@@ -34,10 +34,9 @@ class UserService:
 
             # Hash password
             password = user_data.password
-            user_data.hashed_password = pwd_context.hash(password)
+            hashed_password = pwd_context.hash(password)
 
-            user = User.model_validate(user_data)
-            return await self.user_repo.create(user)
+            return await self.user_repo.create(user_data, hashed_password)
         except ServiceException:
             raise
         except ValueError as e:

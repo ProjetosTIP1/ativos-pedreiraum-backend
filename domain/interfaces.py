@@ -8,6 +8,7 @@ from .entities import (
     Category,
     AppConfig,
     User,
+    UserCreateRequest,
     Branch,
     ImageMetadata,
 )
@@ -87,7 +88,7 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    async def create(self, user: User) -> User:
+    async def create(self, user: UserCreateRequest, hashed_password: str) -> User:
         pass
 
     @abstractmethod
