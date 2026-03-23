@@ -113,3 +113,31 @@ class UserService:
             raise
         except Exception as e:
             raise InfrastructureServiceException("Failed to delete user") from e
+
+    async def update_password(
+        self, user_id: UUID, old_password: str, new_password: str
+    ) -> bool:
+        try:
+            user = await self.user_repo.get_by_id(user_id)
+            if not user:
+                raise ValidationServiceException("User not found")
+
+            # Get password hash
+            password_hash = await self.user_repo.get_password_hash_by_email(user.email)
+            if not password_hash:
+                raise InfrastructureServiceException("Failed to retrieve current password")
+
+            # Verify old password
+            if not await self.verify_password(old_password, password_hash):
+                raise ValidationServiceException("Incorrect old password")
+
+            # Hash and update new password
+            hashed_new_password = pwd_context.hash(new_password)
+            updated_user = await self.user_repo.update(
+                user_id, {"hashed_password": hashed_new_password}
+            )
+            return updated_user is not None
+        except ServiceException:
+            raise
+        except Exception as e:
+            raise InfrastructureServiceException("Failed to update password") from e

@@ -38,6 +38,25 @@ class UserCreateRequest(BaseModel):
     full_name: str = Field(..., min_length=2, max_length=100)
     contact: str = Field(..., min_length=10, max_length=20)
     password: str = Field(..., min_length=8)
+    role: Optional[UserRole] = UserRole.REGULAR
+
+
+class UserUpdateRequest(BaseModel):
+    full_name: Optional[str] = Field(None, min_length=2, max_length=100)
+    contact: Optional[str] = Field(None, min_length=10, max_length=20)
+
+
+class AdminUserUpdateRequest(BaseModel):
+    full_name: Optional[str] = Field(None, min_length=2, max_length=100)
+    contact: Optional[str] = Field(None, min_length=10, max_length=20)
+    role: Optional[UserRole] = None
+    email: Optional[str] = None
+
+
+class UserUpdatePasswordRequest(BaseModel):
+    old_password: str = Field(..., min_length=8)
+    new_password: str = Field(..., min_length=8)
+
 
 
 class Category(BaseEntity):

@@ -10,7 +10,9 @@ from api.v1.categories import router as category_router
 from api.v1.admin_assets import router as admin_router
 from api.v1.auth import router as auth_router
 from api.v1.images import router as image_router
+from api.v1.users import router as user_router
 from core.helpers.exceptions_helper import ServiceException, to_http_exception
+
 
 
 @asynccontextmanager
@@ -48,6 +50,8 @@ app.include_router(category_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(image_router, prefix="/api/v1")
+app.include_router(user_router, prefix="/api/v1")
+
 
 # Mount Static Files for Image Served Locally
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
