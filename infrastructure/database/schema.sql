@@ -73,3 +73,6 @@ WHERE (is_main = TRUE);
 
 -- NOTE: Full-text search trigger can be added here in the future
 -- when a search_vector column is added to the assets table.
+
+INSERT INTO users (email, full_name, contact, role, hashed_password)
+VALUES ('admin@pedreiraumvalemix.com.br', 'Administrador P1', '3199999999', 'ADMIN', '$pbkdf2-sha256$29000$UIrxvlcK4Ryj1PofI4SQMg$2QmlMxiEXk5PeM8aHlm2S4MaeIL2bnLrC/8jMXwb.1M');
