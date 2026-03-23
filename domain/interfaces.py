@@ -1,7 +1,16 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 from uuid import UUID
-from .entities import Asset, CreateAssetRequest, UpdateAssetRequest, Category, AppConfig, User, Branch, ImageMetadata
+from .entities import (
+    Asset,
+    CreateAssetRequest,
+    UpdateAssetRequest,
+    Category,
+    AppConfig,
+    User,
+    Branch,
+    ImageMetadata,
+)
 from .enums import AssetCategory, AssetStatus
 
 
@@ -36,7 +45,9 @@ class IAssetRepository(ABC):
         pass
 
     @abstractmethod
-    async def update(self, asset_id: UUID, asset_data: UpdateAssetRequest) -> Optional[Asset]:
+    async def update(
+        self, asset_id: UUID, asset_data: UpdateAssetRequest
+    ) -> Optional[Asset]:
         pass
 
     @abstractmethod
@@ -131,6 +142,12 @@ class IImageRepository(ABC):
 
     @abstractmethod
     async def create(self, image: ImageMetadata) -> ImageMetadata:
+        pass
+
+    @abstractmethod
+    async def update(
+        self, image_id: UUID, image_data: ImageMetadata
+    ) -> Optional[ImageMetadata]:
         pass
 
     @abstractmethod

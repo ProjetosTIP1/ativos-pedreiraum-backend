@@ -87,6 +87,37 @@ class SQLImageRepository(IImageRepository):
             logger.error(f"Error creating image metadata: {e}")
             raise
 
+    async def update(
+        self, image_id: UUID, image_data: ImageMetadata
+    ) -> Optional[ImageMetadata]:
+        try:
+            image_dict = image_data.model_dump(exclude={"created_at"})
+
+            # Convert Pydantic types to basic ones that asyncpg understands
+            for key, value in image_dict.items():
+                if hasattr(value, "value") and not isinstance(value, str):  # Enums
+                    image_dict[key] = value.value
+
+            columns = ", ".join(image_dict.keys())
+            placeholders = ", ".join([f"${i + 1}" for i in range(len(image_dict))])
+            values = list(image_dict.values())
+
+            async with self.connection.transaction():
+                sql = f"""UPDATE image_metadata SET ({columns}) = ({placeholders}) WHERE id = $1 RETURNING id,
+                asset_id,
+                url,
+                is_main,
+                position,
+                created_at"""
+                row = await self.connection.fetchrow(sql, *values)
+                if not row:
+                    raise Exception("Failed to update image metadata")
+                updated_image = ImageMetadata.model_validate(dict(row))
+                return updated_image
+        except Exception as e:
+            logger.error(f"Error updating image metadata: {e}")
+            raise
+
     async def delete(self, image_id: UUID) -> bool:
         try:
             image = await self.get_by_id(image_id)

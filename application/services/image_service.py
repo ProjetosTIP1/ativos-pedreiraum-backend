@@ -28,7 +28,7 @@ class ImageService:
         asset_id: UUID,
         file: UploadFile,
         is_main: bool = False,
-        position: Optional[str] = "OTHERS",
+        position: Optional[str] = "OUTROS",
     ) -> ImageMetadata:
         """
         Validates, saves the file locally, and stores metadata in the database.
@@ -59,19 +59,9 @@ class ImageService:
             filename = f"{uuid4().hex}{ext}"
             file_path = os.path.join(settings.UPLOAD_DIR, filename)
 
-            # 3. Save file locally using aiofiles for async I/O
-            try:
-                async with aiofiles.open(file_path, "wb") as out_file:
-                    while content := await file.read(1024 * 1024):  # 1MB chunks
-                        await out_file.write(content)
-            except Exception as e:
-                raise InfrastructureServiceException(
-                    f"Failed to save file: {str(e)}"
-                ) from e
-
-            # 4. Determine URL and save metadata
+            # 3. Determine URL and save metadata
             # The URL should be relative for the static file route mount
-            url = f"/images/{filename}"
+            url = filename
 
             image = ImageMetadata(
                 id=uuid4(),
@@ -81,7 +71,16 @@ class ImageService:
                 position=ImagePosition(norm_position),
             )
 
+            # Check if asset already has an image with this position
+            images_metadata = await self.image_repo.list_by_asset(asset_id)
+            for image_metadata in images_metadata:
+                if image_metadata.position == norm_position:
+                    await self.image_repo.delete(image_metadata.id)
+
             created_image: ImageMetadata | None = await self.image_repo.create(image)
+
+            if not created_image:
+                raise NotFoundServiceException("Image not found")
 
             # If it's intended to be main, use the repo method which handles the transaction safely
             if is_main:
@@ -90,6 +89,17 @@ class ImageService:
                 created_image = await self.image_repo.get_by_id(created_image.id)
                 if not created_image:
                     raise NotFoundServiceException("Image not found")
+
+            # 4. Save file locally using aiofiles for async I/O
+            # This is the last step to prevent orphaned files
+            try:
+                async with aiofiles.open(file_path, "wb") as out_file:
+                    while content := await file.read(1024 * 1024):  # 1MB chunks
+                        await out_file.write(content)
+            except Exception as e:
+                raise InfrastructureServiceException(
+                    f"Failed to save file: {str(e)}"
+                ) from e
 
             return created_image
         except ServiceException:
