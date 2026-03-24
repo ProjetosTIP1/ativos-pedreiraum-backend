@@ -1,3 +1,6 @@
+from domain.enums import AssetStatus, AssetCategory
+from fastapi import Query
+from typing import Optional
 from typing import List
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -32,10 +35,27 @@ async def create_asset(
 @router.get("/", response_model=List[Asset])
 async def list_assets(
     service: AssetService = Depends(get_asset_service),
-    _current_admin: User = Depends(get_current_admin),
+    current_user: User = Depends(get_current_admin),
+    category: Optional[AssetCategory] = None,
+    brand: Optional[str] = None,
+    min_year: Optional[int] = None,
+    max_year: Optional[int] = None,
+    status: Optional[AssetStatus] = None,
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    user_id: Optional[UUID] = None,
 ):
     try:
-        return await service.get_all_assets()
+        return await service.get_all_assets(
+            category=category,
+            brand=brand,
+            min_year=min_year,
+            max_year=max_year,
+            status=status,
+            limit=limit,
+            offset=offset,
+            user_id=user_id,
+        )
     except HTTPException:
         raise
     except ServiceException as e:

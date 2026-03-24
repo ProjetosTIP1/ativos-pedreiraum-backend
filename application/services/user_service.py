@@ -125,7 +125,9 @@ class UserService:
             # Get password hash
             password_hash = await self.user_repo.get_password_hash_by_email(user.email)
             if not password_hash:
-                raise InfrastructureServiceException("Failed to retrieve current password")
+                raise InfrastructureServiceException(
+                    "Failed to retrieve current password"
+                )
 
             # Verify old password
             if not await self.verify_password(old_password, password_hash):

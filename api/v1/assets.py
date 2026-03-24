@@ -1,4 +1,3 @@
-from uuid import UUID
 import asyncpg
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, HTTPException
@@ -31,10 +30,8 @@ async def list_assets(
     brand: Optional[str] = None,
     min_year: Optional[int] = None,
     max_year: Optional[int] = None,
-    q: Optional[str] = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    user_id: Optional[UUID] = None,
     service: AssetService = Depends(get_asset_service),
 ):
     try:
@@ -45,7 +42,6 @@ async def list_assets(
             max_year=max_year,
             limit=limit,
             offset=offset,
-            user_id=user_id,
         )
     except HTTPException:
         raise

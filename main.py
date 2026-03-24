@@ -14,7 +14,6 @@ from api.v1.users import router as user_router
 from core.helpers.exceptions_helper import ServiceException, to_http_exception
 
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Ensure upload directory exists

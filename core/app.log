@@ -359,3 +359,9 @@ DETAIL:  Chave (asset_id)=(cd5b2b19-0aa9-4847-904a-32f858c95010) já existe.
 2026-03-24 07:48:01 |  | ERROR  Database connection error: 404: Asset not found 
 2026-03-24 08:06:52 |  | ERROR  Database connection error: 401: Could not validate credentials 
 2026-03-24 08:06:52 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 09:04:16 |  | ERROR  Error listing all assets: elemento incorreto após valor numérico em ou próximo a "7fd3f3c0" 
+2026-03-24 09:04:16 |  | ERROR  Database connection error: 500: {'message': 'Failed to list assets', 'code': 'infrastructure_error'} 
+2026-03-24 09:14:29 |  | ERROR  Database connection error: 500: {'message': 'Failed to list assets', 'code': 'infrastructure_error'} 
+2026-03-24 09:15:22 |  | ERROR  Database connection error: 500: {'message': 'Failed to list assets', 'code': 'infrastructure_error'} 
+2026-03-24 09:16:41 |  | ERROR  Database connection error: 500: {'message': 'Failed to list assets', 'code': 'infrastructure_error'} 
+2026-03-24 09:17:35 |  | ERROR  Database connection error: 500: {'message': 'Failed to list assets', 'code': 'infrastructure_error'} 

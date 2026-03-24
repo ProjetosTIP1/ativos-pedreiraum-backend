@@ -58,7 +58,6 @@ class UserUpdatePasswordRequest(BaseModel):
     new_password: str = Field(..., min_length=8)
 
 
-
 class Category(BaseEntity):
     id: int
     name: str = Field(..., min_length=2, max_length=100)
