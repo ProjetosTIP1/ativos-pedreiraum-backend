@@ -64,5 +64,50 @@ python main.py
 
 O servidor estará disponível em `http://localhost:8000`. A documentação interativa da API (Swagger) pode ser acessada em `http://localhost:8000/docs`.
 
+## 🐳 Docker
+
+O projeto está totalmente containerizado utilizando **Docker** e **uv**, garantindo um ambiente de desenvolvimento e produção consistente e performático.
+
+### Construindo a Imagem
+Para gerar a imagem Docker do backend:
+```bash
+docker build -t valemix-backend .
+```
+
+### Inicializando o Container (Standalone)
+Você pode rodar o container individualmente passando o arquivo `.env`:
+```bash
+docker run --name valemix-backend --env-file .env -p 8000:8000 valemix-backend
+```
+
+### Docker Compose e Rede Dedicada
+Para integrar o backend em uma infraestrutura completa, recomendamos o uso de uma rede dedicada. Abaixo um exemplo de configuração no `docker-compose.yml`:
+
+```yaml
+services:
+  backend:
+    image: valemix-backend
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: valemix-backend
+    restart: always
+    networks:
+      - valemix-network
+    env_file:
+      - .env
+    volumes:
+      - ./images:/app/images
+    ports:
+      - "8000:8000"
+
+networks:
+  valemix-network:
+    driver: bridge
+```
+
+> [!TIP]
+> **Benefícios da Rede Dedicada:** O uso de redes `bridge` dedicadas permite o isolamento de serviços e a comunicação interna via nomes de host (DNS interno do Docker), aumentando a segurança e facilitando a orquestração.
+
 ---
 *Este projeto é mantido seguindo a filosofia de que o melhor código é aquele que pode ser facilmente compreendido e testado.*
