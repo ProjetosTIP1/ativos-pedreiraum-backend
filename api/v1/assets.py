@@ -1,3 +1,4 @@
+from uuid import UUID
 import asyncpg
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, HTTPException
@@ -8,7 +9,7 @@ from infrastructure.repositories.image_repository import SQLImageRepository
 from application.services.image_service import ImageService
 from application.services.asset_service import AssetService
 from domain.entities import Asset
-from domain.enums import AssetCategory
+from domain.enums import AssetCategory, AssetStatus
 from core.helpers.exceptions_helper import ServiceException, to_http_exception
 
 router = APIRouter(prefix="/assets", tags=["Assets"])
@@ -32,6 +33,8 @@ async def list_assets(
     max_year: Optional[int] = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    user_id: Optional[UUID] = None,
+    status: Optional[AssetStatus] = None,
     service: AssetService = Depends(get_asset_service),
 ):
     try:
@@ -42,6 +45,8 @@ async def list_assets(
             max_year=max_year,
             limit=limit,
             offset=offset,
+            user_id=user_id,
+            status=status,
         )
     except HTTPException:
         raise

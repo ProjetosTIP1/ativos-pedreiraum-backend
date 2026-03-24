@@ -37,14 +37,6 @@ class AssetService:
         except Exception as e:
             raise InfrastructureServiceException("Failed to list assets") from e
 
-    async def get_all_assets(self, **filters) -> List[Asset]:
-        try:
-            return await self.asset_repo.list_all(**filters)
-        except ServiceException:
-            raise
-        except Exception as e:
-            raise InfrastructureServiceException("Failed to list assets") from e
-
     async def get_asset_by_id(self, asset_id: str) -> Optional[Asset]:
         try:
             return await self.asset_repo.get_by_id(UUID(asset_id))

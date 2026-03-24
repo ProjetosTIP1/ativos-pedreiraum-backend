@@ -32,22 +32,9 @@ class IAssetRepository(ABC):
         min_year: Optional[int] = None,
         max_year: Optional[int] = None,
         status: Optional[AssetStatus] = None,
-        limit: int = 20,
-        offset: int = 0,
-    ) -> List[Asset]:
-        pass
-
-    @abstractmethod
-    async def list_all(
-        self,
-        category: Optional[AssetCategory] = None,
-        brand: Optional[str] = None,
-        min_year: Optional[int] = None,
-        max_year: Optional[int] = None,
-        status: Optional[AssetStatus] = None,
-        limit: int = 20,
-        offset: int = 0,
         user_id: Optional[UUID] = None,
+        limit: int = 20,
+        offset: int = 0,
     ) -> List[Asset]:
         pass
 

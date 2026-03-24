@@ -137,10 +137,11 @@ List all assets with optional filtering and pagination.
   - `brand`: `str`
   - `min_year`: `int`
   - `max_year`: `int`
-  - `q`: `str` (search query)
   - `limit`: `int` (default: 20)
   - `offset`: `int` (default: 0)
-- **Response (200 OK):** List of `Asset` objects with status 'DISPONÍVEL'.
+  - `user_id`: `UUID` (optional)
+  - `status`: `AssetStatus` (default: 'DISPONÍVEL')
+- **Response (200 OK):** List of `Asset` objects.
 - **Requirements:** Public.
 
 ### GET `/assets/highlights`
@@ -158,21 +159,6 @@ Retrieve detailed information about a single asset by ID.
 ---
 
 ## Admin Assets
-
-### GET `/admin/assets/`
-List all assets with optional filtering and pagination.
-
-- **Query Parameters:**
-  - `category`: `AssetCategory` (e.g. "CAMINHÕES")
-  - `brand`: `str`
-  - `min_year`: `int`
-  - `max_year`: `int`
-  - `q`: `str` (search query)
-  - `limit`: `int` (default: 20)
-  - `offset`: `int` (default: 0)
-  - `user_id`: `UUID` (optional)
-- **Response (200 OK):** List of `Asset` objects.
-- **Requirements:** Admin account only.
 
 ### POST `/admin/assets/`
 Create a new asset.
