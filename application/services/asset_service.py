@@ -29,9 +29,17 @@ class AssetService:
                 "Failed to initialize asset service"
             ) from e
 
-    async def get_all_assets(self, **filters) -> List[Asset]:
+    async def get_available_assets(self, **filters) -> List[Asset]:
         try:
             return await self.asset_repo.list(**filters)
+        except ServiceException:
+            raise
+        except Exception as e:
+            raise InfrastructureServiceException("Failed to list assets") from e
+
+    async def get_all_assets(self) -> List[Asset]:
+        try:
+            return await self.asset_repo.list_all()
         except ServiceException:
             raise
         except Exception as e:

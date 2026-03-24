@@ -38,6 +38,10 @@ class IAssetRepository(ABC):
         pass
 
     @abstractmethod
+    async def list_all(self) -> List[Asset]:
+        pass
+
+    @abstractmethod
     async def get_featured(self) -> List[Asset]:
         pass
 

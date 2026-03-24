@@ -1,3 +1,4 @@
+from uuid import UUID
 import asyncpg
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, HTTPException
@@ -33,16 +34,18 @@ async def list_assets(
     q: Optional[str] = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    user_id: Optional[UUID] = None,
     service: AssetService = Depends(get_asset_service),
 ):
     try:
-        return await service.get_all_assets(
+        return await service.get_available_assets(
             category=category,
             brand=brand,
             min_year=min_year,
             max_year=max_year,
             limit=limit,
             offset=offset,
+            user_id=user_id,
         )
     except HTTPException:
         raise

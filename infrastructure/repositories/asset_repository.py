@@ -87,9 +87,14 @@ class SQLAssetRepository(IAssetRepository):
         status: Optional[AssetStatus] = None,
         limit: int = 20,
         offset: int = 0,
+        user_id: Optional[UUID] = None,
     ) -> List[Asset]:
         try:
-            filters = []
+            filters = [
+                "is_active = TRUE",
+                "deleted_at IS NULL",
+                "status = 'DISPONÍVEL'",
+            ]
             values = []
             idx = 1
 
@@ -112,6 +117,10 @@ class SQLAssetRepository(IAssetRepository):
             if status:
                 filters.append(f"status = ${idx}")
                 values.append(status.value)
+                idx += 1
+            if user_id:
+                filters.append(f"created_by_user_id = ${idx}")
+                values.append(user_id)
                 idx += 1
 
             # Always include base conditions
@@ -146,6 +155,35 @@ class SQLAssetRepository(IAssetRepository):
             return [Asset.model_validate(dict(row)) for row in rows]
         except Exception as e:
             logger.error(f"Error listing assets: {e}")
+            raise e
+
+    async def list_all(self) -> List[Asset]:
+        try:
+            query = """SELECT id,
+                      name,
+                      category,
+                      subcategory,
+                      brand,
+                      model,
+                      year,
+                      serial_number,
+                      location,
+                      condition,
+                      status,
+                      price,
+                      description,
+                      rep_contact,
+                      highlighted,
+                      view_count,
+                      created_by_user_id,
+                      specifications,
+                      created_at,
+                      updated_at
+                      FROM assets WHERE is_active = TRUE AND deleted_at IS NULL ORDER BY created_at DESC"""
+            rows = await self.connection.fetch(query)
+            return [Asset.model_validate(dict(row)) for row in rows]
+        except Exception as e:
+            logger.error(f"Error listing all assets: {e}")
             raise e
 
     async def get_featured(self) -> List[Asset]:

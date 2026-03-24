@@ -1,3 +1,4 @@
+from typing import List
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from api.v1.auth import get_current_admin
@@ -18,6 +19,23 @@ async def create_asset(
     try:
         # Admin can create assets directly, we set user_id for tracking
         return await service.create_asset(asset_data, user_id=current_user.id)
+    except HTTPException:
+        raise
+    except ServiceException as e:
+        raise to_http_exception(e)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.get("/", response_model=List[Asset])
+async def list_assets(
+    service: AssetService = Depends(get_asset_service),
+    _current_admin: User = Depends(get_current_admin),
+):
+    try:
+        return await service.get_all_assets()
     except HTTPException:
         raise
     except ServiceException as e:
