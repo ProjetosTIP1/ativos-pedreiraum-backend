@@ -365,3 +365,44 @@ DETAIL:  Chave (asset_id)=(cd5b2b19-0aa9-4847-904a-32f858c95010) já existe.
 2026-03-24 09:15:22 |  | ERROR  Database connection error: 500: {'message': 'Failed to list assets', 'code': 'infrastructure_error'} 
 2026-03-24 09:16:41 |  | ERROR  Database connection error: 500: {'message': 'Failed to list assets', 'code': 'infrastructure_error'} 
 2026-03-24 09:17:35 |  | ERROR  Database connection error: 500: {'message': 'Failed to list assets', 'code': 'infrastructure_error'} 
+2026-03-24 10:19:13 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 10:19:13 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 10:19:38 |  | ERROR  Database connection error: 401: Incorrect email or password 
+2026-03-24 10:20:34 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 10:20:34 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 10:20:40 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 10:20:40 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 10:20:47 |  | ERROR  Database connection error: 401: Incorrect email or password 
+2026-03-24 10:20:52 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 10:20:52 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 10:21:14 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 10:21:14 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 10:21:30 |  | ERROR  Database connection error: 401: Incorrect email or password 
+2026-03-24 10:21:57 |  | ERROR  Database connection error: 401: Incorrect email or password 
+2026-03-24 11:16:48 |  | ERROR  Database connection error: 1 validation error:
+  {'type': 'string_too_short', 'loc': ('body', 'subcategory'), 'msg': 'String should have at least 2 characters', 'input': '', 'ctx': {'min_length': 2}}
+
+  File "C:\Users\herik.rezende\Projetos\ativos-project\backend\api\v1\admin_assets.py", line 12, in create_asset
+    POST /api/v1/admin/assets/ 
+2026-03-24 11:20:29 |  | ERROR  Database connection error: 1 validation error:
+  {'type': 'string_too_short', 'loc': ('body', 'serial_number'), 'msg': 'String should have at least 2 characters', 'input': '', 'ctx': {'min_length': 2}}
+
+  File "C:\Users\herik.rezende\Projetos\ativos-project\backend\api\v1\admin_assets.py", line 12, in create_asset
+    POST /api/v1/admin/assets/ 
+2026-03-24 11:27:16 |  | ERROR  Error creating image metadata: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(7c8c4e9c-dd74-4036-9c64-a74ff1f21def) já existe. 
+2026-03-24 11:27:16 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
+2026-03-24 11:33:46 |  | ERROR  Database connection error: 1 validation error:
+  {'type': 'string_too_short', 'loc': ('body', 'model'), 'msg': 'String should have at least 2 characters', 'input': '', 'ctx': {'min_length': 2}}
+
+  File "C:\Users\herik.rezende\Projetos\ativos-project\backend\api\v1\admin_assets.py", line 12, in create_asset
+    POST /api/v1/admin/assets/ 
+2026-03-24 11:34:10 |  | ERROR  Error creating image metadata: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(a0509995-0d73-40c9-a5e5-418f198324a8) já existe. 
+2026-03-24 11:34:10 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
+2026-03-24 11:42:59 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 11:43:00 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 11:48:22 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 11:48:22 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 11:48:44 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-24 11:48:44 |  | ERROR  Database connection error: 401: Could not validate credentials 

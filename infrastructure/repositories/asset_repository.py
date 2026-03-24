@@ -41,6 +41,7 @@ class SQLAssetRepository(IAssetRepository):
             FROM assets WHERE id = $1 AND is_active = TRUE AND deleted_at IS NULL"""
             row = await self.connection.fetchrow(query, asset_id)
             if row:
+                await self.increment_view_count(asset_id)
                 return Asset.model_validate(dict(row))
             return None
         except Exception as e:
