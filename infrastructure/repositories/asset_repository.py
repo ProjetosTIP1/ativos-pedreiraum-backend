@@ -266,8 +266,8 @@ class SQLAssetRepository(IAssetRepository):
         try:
             query = "UPDATE assets SET deleted_at = CURRENT_TIMESTAMP, is_active = FALSE WHERE id = $1"
             result = await self.connection.execute(query, asset_id)
-            # result is a string like 'DELETE 1'
-            return result == "DELETE 1"
+            # result is a string like 'UPDATE 1'
+            return result == "UPDATE 1"
         except Exception as e:
             logger.error(f"Error deleting asset {asset_id}: {e}")
             raise

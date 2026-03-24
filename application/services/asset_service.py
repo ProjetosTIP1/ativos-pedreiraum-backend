@@ -10,6 +10,7 @@ from core.helpers.exceptions_helper import (
     InfrastructureServiceException,
 )
 from application.services.image_service import ImageService
+from core.helpers.logger_helper import logger
 
 
 class AssetService:
@@ -104,10 +105,13 @@ class AssetService:
                 raise ValidationServiceException("Cannot delete a reserved asset.")
 
             # Delete all associated images (files and metadata)
-            if self.image_service:
-                images = await self.image_service.get_asset_images(asset_id)
-                for img in images:
-                    await self.image_service.delete_image(img.id)
+            try:
+                if self.image_service:
+                    images = await self.image_service.get_asset_images(asset_id)
+                    for img in images:
+                        await self.image_service.delete_image(img.id)
+            except Exception as e:
+                logger.error(f"Failed to delete images for asset {asset_id}: {e}")
 
             return await self.asset_repo.delete(asset_id)
         except ServiceException:

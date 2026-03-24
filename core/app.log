@@ -283,3 +283,77 @@ status
 
   File "C:\Users\herik.rezende\Projetos\ativos-project\backend\api\v1\users.py", line 94, in admin_update_user
     PATCH /api/v1/users/{user_id} 
+2026-03-23 10:47:26 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-23 10:56:30 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-23 10:56:30 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-23 10:56:58 |  | ERROR  Database connection error: 401: Incorrect email or password 
+2026-03-23 13:59:09 |  | ERROR  Database connection error: 404: Asset not found 
+2026-03-23 15:21:47 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-23 15:21:47 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-23 15:22:03 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-23 15:22:03 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-23 15:22:35 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-23 15:22:35 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-03-23 16:38:30 |  | ERROR  Error creating image metadata: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(f4ac23d9-83f7-4b11-b131-6e7ea42c60c5) já existe. 
+2026-03-23 16:38:30 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
+2026-03-23 16:38:30 |  | ERROR  Error deleting image metadata 6e22643f-8792-441d-8265-4d0bcab4d327: coluna "main_image" da relação "assets" não existe 
+2026-03-23 16:38:30 |  | ERROR  Database connection error: 500: {'message': 'Failed to delete image', 'code': 'infrastructure_error'} 
+2026-03-23 16:38:43 |  | ERROR  Error setting main image 78708fde-9f63-4dd6-b4c4-414b7e01a8ad for asset 72667426-f3c3-4b2e-958f-4156ef7b2aa3: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(72667426-f3c3-4b2e-958f-4156ef7b2aa3) já existe. 
+2026-03-23 16:38:43 |  | ERROR  Error setting main image b8d8fa92-301d-48aa-b4fc-5c311b78d61b for asset 72667426-f3c3-4b2e-958f-4156ef7b2aa3: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(72667426-f3c3-4b2e-958f-4156ef7b2aa3) já existe. 
+2026-03-23 16:38:43 |  | ERROR  Error creating image metadata: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(72667426-f3c3-4b2e-958f-4156ef7b2aa3) já existe. 
+2026-03-23 16:38:43 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
+2026-03-23 16:38:43 |  | ERROR  Error creating image metadata: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(72667426-f3c3-4b2e-958f-4156ef7b2aa3) já existe. 
+2026-03-23 16:38:43 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
+2026-03-23 16:38:43 |  | ERROR  Error setting main image d27a24e3-af29-47ce-97bd-f22519b377d0 for asset 72667426-f3c3-4b2e-958f-4156ef7b2aa3: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(72667426-f3c3-4b2e-958f-4156ef7b2aa3) já existe. 
+2026-03-23 16:38:43 |  | ERROR  Error creating image metadata: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(72667426-f3c3-4b2e-958f-4156ef7b2aa3) já existe. 
+2026-03-23 16:38:43 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
+2026-03-23 16:38:43 |  | ERROR  Error deleting image metadata e7752805-5fad-4e88-a147-2e22cfaae462: coluna "main_image" da relação "assets" não existe 
+2026-03-23 16:38:43 |  | ERROR  Database connection error: 500: {'message': 'Failed to delete image', 'code': 'infrastructure_error'} 
+2026-03-23 16:40:06 |  | ERROR  Error setting main image a5adf235-de35-40d1-9506-cbd0876cc04a for asset 195f0402-8390-42c9-a9ee-1cd1f6e08857: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(195f0402-8390-42c9-a9ee-1cd1f6e08857) já existe. 
+2026-03-23 16:40:06 |  | ERROR  Error creating image metadata: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(195f0402-8390-42c9-a9ee-1cd1f6e08857) já existe. 
+2026-03-23 16:40:06 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
+2026-03-23 16:40:06 |  | ERROR  Error setting main image bdf72a6f-c5ce-4f23-8250-326414ac77f7 for asset 195f0402-8390-42c9-a9ee-1cd1f6e08857: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(195f0402-8390-42c9-a9ee-1cd1f6e08857) já existe. 
+2026-03-23 16:40:06 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
+2026-03-23 16:40:06 |  | ERROR  Error deleting image metadata 1492718c-4618-42e0-a1d4-332e4d0b5918: coluna "main_image" da relação "assets" não existe 
+2026-03-23 16:40:06 |  | ERROR  Database connection error: 500: {'message': 'Failed to delete image', 'code': 'infrastructure_error'} 
+2026-03-23 16:40:48 |  | ERROR  Error creating image metadata: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(2ed53204-3e8c-40f6-a22f-d8a440a94df0) já existe. 
+2026-03-23 16:40:48 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
+2026-03-23 16:40:48 |  | ERROR  Error deleting image metadata 86ba4aa3-ae18-4478-8f4e-9e9760f89d3e: coluna "main_image" da relação "assets" não existe 
+2026-03-23 16:40:48 |  | ERROR  Database connection error: 500: {'message': 'Failed to delete image', 'code': 'infrastructure_error'} 
+2026-03-23 16:40:57 |  | ERROR  Error creating image metadata: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(fbda2343-5d89-4de2-9db7-6433de5fb0ff) já existe. 
+2026-03-23 16:40:57 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
+2026-03-23 16:40:57 |  | ERROR  Error deleting image metadata a1dd9b23-785e-4613-a591-da84f0e64b2d: coluna "main_image" da relação "assets" não existe 
+2026-03-23 16:40:57 |  | ERROR  Database connection error: 500: {'message': 'Failed to delete image', 'code': 'infrastructure_error'} 
+2026-03-23 16:41:16 |  | ERROR  Error creating image metadata: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(29ed1f1d-c70b-4e4c-b1db-fe81b7c99e75) já existe. 
+2026-03-23 16:41:16 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
+2026-03-23 16:41:16 |  | ERROR  Error deleting image metadata 3ca6b4e8-1afb-47b9-90b4-39451e9fee54: coluna "main_image" da relação "assets" não existe 
+2026-03-23 16:41:16 |  | ERROR  Database connection error: 500: {'message': 'Failed to delete image', 'code': 'infrastructure_error'} 
+2026-03-23 16:42:08 |  | ERROR  Error deleting image metadata e7752805-5fad-4e88-a147-2e22cfaae462: coluna "main_image" da relação "assets" não existe 
+2026-03-23 16:42:08 |  | ERROR  Database connection error: 500: {'message': 'Failed to delete image', 'code': 'infrastructure_error'} 
+2026-03-23 16:42:21 |  | ERROR  Error deleting image metadata 3ca6b4e8-1afb-47b9-90b4-39451e9fee54: coluna "main_image" da relação "assets" não existe 
+2026-03-23 16:42:21 |  | ERROR  Database connection error: 500: {'message': 'Failed to delete image', 'code': 'infrastructure_error'} 
+2026-03-23 16:42:28 |  | ERROR  Error deleting image metadata a1dd9b23-785e-4613-a591-da84f0e64b2d: coluna "main_image" da relação "assets" não existe 
+2026-03-23 16:42:28 |  | ERROR  Database connection error: 500: {'message': 'Failed to delete image', 'code': 'infrastructure_error'} 
+2026-03-23 16:51:51 |  | ERROR  Error creating image metadata: duplicar valor da chave viola a restrição de unicidade "idx_image_metadata_only_one_main"
+DETAIL:  Chave (asset_id)=(cd5b2b19-0aa9-4847-904a-32f858c95010) já existe. 
+2026-03-23 16:51:51 |  | ERROR  Database connection error: 500: {'message': 'Failed to upload image metadata', 'code': 'infrastructure_error'} 
+2026-03-24 07:21:22 |  | ERROR  Error deleting image metadata 20178c16-7f08-458b-88a6-e52d69a7e44c: coluna "main_image" da relação "assets" não existe 
+2026-03-24 07:21:22 |  | ERROR  Database connection error: 500: {'message': 'Failed to delete image', 'code': 'infrastructure_error'} 
+2026-03-24 07:31:17 |  | ERROR  Database connection error: 404: Asset not found 
+2026-03-24 07:33:12 |  | ERROR  Database connection error: 404: Asset not found 
+2026-03-24 07:38:41 |  | ERROR  Database connection error: 404: Asset not found 
+2026-03-24 07:47:26 |  | ERROR  Database connection error: 404: Asset not found 
+2026-03-24 07:48:01 |  | ERROR  Database connection error: 404: Asset not found 

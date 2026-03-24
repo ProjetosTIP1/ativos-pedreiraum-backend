@@ -127,10 +127,6 @@ class SQLImageRepository(IImageRepository):
             async with self.connection.transaction():
                 # If it was the main image, pick another one or set to empty
                 if image.is_main:
-                    await self.connection.execute(
-                        "UPDATE assets SET main_image = '' WHERE id = $1",
-                        image.asset_id,
-                    )
                     # Try to find another image to be main
                     next_image = await self.connection.fetchrow(
                         "SELECT id FROM image_metadata WHERE asset_id = $1 AND id != $2 LIMIT 1",
