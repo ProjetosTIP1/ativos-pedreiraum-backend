@@ -6,7 +6,7 @@ import glob
 from core.config import settings
 
 # --- POSTGRES CONFIG ---
-CONTAINER_NAME = "5a59c5f9e3a1"
+CONTAINER_NAME = settings.POSTGRES_CONTAINER_ID
 DB_USER = settings.POSTGRES_USER
 DB_NAME = settings.POSTGRES_DB
 BACKUP_DIR = settings.BACKUP_DIR
@@ -69,6 +69,9 @@ def restore_backup(backup_path):
 
 def run_restore():
 
+    if not CONTAINER_NAME:
+        raise ValueError("POSTGRES_CONTAINER_ID not set in environment variables")
+
     if not os.path.exists(BACKUP_DIR):
         print(f"Diretório de backup não encontrado em {BACKUP_DIR}")
         return
@@ -102,4 +105,9 @@ def run_restore():
 
 
 if __name__ == "__main__":
-    run_restore()
+    try:
+        run_restore()
+    except ValueError as e:
+        print(f"❌ Error: {e}")
+    except Exception as e:
+        print(f"❌ Error: {e}")

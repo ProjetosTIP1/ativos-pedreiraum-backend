@@ -12,7 +12,10 @@ def run_postgres_backup():
     filepath = os.path.join(settings.BACKUP_DIR, filename)
 
     # In Docker, we use the container name defined in docker-compose.yml
-    CONTAINER_NAME = "5a59c5f9e3a1"
+    CONTAINER_NAME = settings.POSTGRES_CONTAINER_ID
+
+    if not CONTAINER_NAME:
+        raise ValueError("POSTGRES_CONTAINER_ID not set in environment variables")
 
     # Use PGPASSWORD env var so pg_dump doesn't prompt for it
     os.environ["PGPASSWORD"] = settings.POSTGRES_PASSWORD
@@ -61,4 +64,9 @@ def run_postgres_backup():
 
 
 if __name__ == "__main__":
-    run_postgres_backup()
+    try:
+        run_postgres_backup()
+    except ValueError as e:
+        print(f"❌ Error: {e}")
+    except Exception as e:
+        print(f"❌ Error: {e}")

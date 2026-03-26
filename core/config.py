@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "valemix")
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")
     POSTGRES_PORT: str = os.getenv("POSTGRES_PORT", "5432")
+    POSTGRES_CONTAINER_ID: str = os.getenv("POSTGRES_CONTAINER_ID", "")
 
     DATABASE_URL: Optional[str] = Field(default=None)
 
