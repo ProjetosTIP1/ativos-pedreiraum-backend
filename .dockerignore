@@ -10,7 +10,6 @@ Dockerfile
 docker-compose.yml
 .ruff_cache/
 .python-version
-uv.lock
 README.md
 API.md
 APPDETAIL.md

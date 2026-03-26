@@ -1,4 +1,5 @@
 # Use the official Python image as a base
+FROM ghcr.io/astral-sh/uv:latest AS uv
 FROM python:3.12-slim-bullseye
 
 # Set environment variables
@@ -13,14 +14,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv for fast dependency management
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+# Copy uv from the official image
+COPY --from=uv /uv /usr/local/bin/uv
+COPY pyproject.toml uv.lock ./
 
 # Set the working directory
 WORKDIR /app
 
 # Copy dependency files first for better caching
-COPY pyproject.toml uv.lock ./
 
 # Install dependencies using uv
 # --frozen ensures we use the exact versions in uv.lock
@@ -30,8 +31,10 @@ RUN uv sync --frozen --no-install-project --no-dev
 # Copy the rest of the application code
 COPY . .
 
+RUN uv sync --frozen
+
 # Create a non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser \
+RUN groupadd -r appuser && useradd -m -r -g appuser appuser \
     && chown -R appuser:appuser /app
 USER appuser
 

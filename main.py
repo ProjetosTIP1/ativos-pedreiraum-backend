@@ -20,11 +20,17 @@ async def lifespan(app: FastAPI):
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 
     # Startup: Initialize the database pool
-    db_manager = DatabaseManager()
-    await db_manager.connect()
+    try:
+        db_manager = DatabaseManager()
+        await db_manager.connect()
+    except Exception as e:
+        print(f"Error connecting to database: {e}")
     yield
     # Shutdown: Close the database pool
-    await db_manager.disconnect()
+    try:
+        await db_manager.disconnect()
+    except Exception as e:
+        print(f"Error disconnecting from database: {e}")
 
 
 app = FastAPI(
