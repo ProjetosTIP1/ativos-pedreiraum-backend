@@ -1,88 +1,90 @@
-# 🗄️ Database Backup Routine Documentation
+# 🗄️ Database Backup & Restore Documentation
 
-This document explains the technical details, configuration, and execution of the PostgreSQL backup routine implemented in `backup.py`.
+This document explains the technical details, configuration, and execution of the PostgreSQL backup and restoration tools implemented in `backup.py` and `restore.py`.
 
 ## 📌 Overview
 
-The backup routine is a Python-based script designed to perform a full database dump of the PostgreSQL service running inside a Docker container. It uses a **streaming approach** to bridge the containerized environment with the host filesystem efficiently.
+The project includes two Python-based scripts to manage database state securely and efficiently:
 
-### Execution Workflow
+1.  **`backup.py`**: Performs a full database dump, compresses it, and saves it locally.
+2.  **`restore.py`**: Provides an interactive interface to select and restore a backup into the database container.
 
-1.  **Configuration Loading**: Reads database credentials and paths from `core.config.settings`.
-2.  **Environment Setup**: Temporarily injects `PGPASSWORD` into the environment for `pg_dump` authentication.
-3.  **Command Execution**: Spawns a `docker exec` process to run `pg_dump` inside the container.
-4.  **Streaming & Compression**: Pipes the raw SQL output from the process directly into a `gzip` file stream on the host.
-5.  **Cleanup**: Removes sensitive environment variables and handles potential failures by deleting partial files.
+Both scripts use a **streaming approach**, piping data directly between the Docker container and the host filesystem to minimize disk I/O and memory usage.
 
 ---
 
 ## 🛠️ Prerequisites
 
-To run the backup script, the system must have:
+To run these scripts, the system must have:
 
--   **Docker**: Installed and running (the script communicates with a running container).
--   **Python 3.x**: With `pydantic-settings` installed (for configuration management).
--   **PostgreSQL Utilities**: Although `pg_dump` runs *inside* the container, the host must be able to execute `docker` commands.
+-   **Docker**: Installed and running.
+-   **Python 3.x**: With `pydantic-settings` installed.
+-   **Database Access**: The host must be authorized to run `docker exec` commands.
 
 ---
 
 ## ⚙️ Configuration
 
-The script relies on environment variables defined in your `.env` file and managed by `core/config.py`:
+Both scripts share the same configuration environment variables defined in `.env` and managed by `core/config.py`:
 
 | Variable | Description | Default |
 | :--- | :--- | :--- |
 | `POSTGRES_USER` | Database username | `postgres` |
 | `POSTGRES_PASSWORD` | Database password | `postgres` |
 | `POSTGRES_DB` | Name of the database | `valemix` |
-| `BACKUP_DIR` | Directory where `.sql.gz` files are saved | `backups` |
+| `BACKUP_DIR` | Directory for `.sql.gz` files | `backups` |
 
 ### ⚠️ Important Note on Container Name
-The script currently targets a specific container ID or name:
+Both scripts currently target a specific container name/ID:
 ```python
 CONTAINER_NAME = "5a59c5f9e3a1"
 ```
 > [!WARNING]
-> If you recreate your database container or use a different Docker Compose setup, update this variable to match your service name (e.g., `ativos-db`).
+> If your database service name changes (e.g., in `docker-compose.yml`), you must update `CONTAINER_NAME` in both `backup.py` and `restore.py`.
 
 ---
 
 ## 🚀 Technical Implementation Details
 
 ### Efficient Resource Usage
-Unlike traditional routines that dump to a temporary file and *then* compress it, this script uses `subprocess.Popen` and `shutil.copyfileobj`. This means:
--   **Minimal Disk I/O**: The SQL stream is compressed in-memory before hitting the disk.
--   **Scalability**: Can handle large databases without requiring double the storage space during the backup process.
+The scripts use `subprocess.Popen` to stream data:
+-   **Backup**: `pg_dump` output is piped directly into `gzip.open`.
+-   **Restore**: `gzip.open` (read mode) is piped directly into the `psql` process's `stdin`.
 
-### `pg_dump` Flags Used
--   `--clean`: Includes `DROP` statements to make restorations easier.
--   `--if-exists`: Prevents errors during restoration if objects don't exist.
--   `--no-owner`: Removes ownership commands, allowing the backup to be restored by different database users.
+### Safety Features in `restore.py`
+-   **Interactive Selection**: Lists all files in `BACKUP_DIR` with timestamps and sizes.
+-   **Confirmation Prompt**: Requires the user to type `RESTORE` to prevent accidental overwrites.
+-   **Atomic Restoration**: Uses `--single-transaction` so that if an error occurs mid-restore, the database remains in its previous state.
 
 ---
 
-## 📅 Automation (Recommended)
+## 📅 Backup Automation
 
-To automate this backup daily on a Linux host, you can add a Cron job:
+To automate backups daily on a Linux host via Cron:
 
-1. Open crontab: `crontab -e`
-2. Add the following line (adjust paths):
+1. `crontab -e`
+2. Add:
    ```bash
-   0 3 * * * /usr/bin/python3 /path/to/project/backend/backup.py >> /var/log/db_backup.log 2>&1
+   0 3 * * * /usr/bin/python3 /absolute/path/to/backend/backup.py >> /var/log/db_backup.log 2>&1
    ```
-   *This runs the backup every day at 3:00 AM.*
 
 ---
 
 ## 🔄 Restoration Guide
 
-To restore a backup generated by this script:
+### Method 1: Interactive Script (Recommended)
+Run the script and follow the prompts:
+```bash
+python restore.py
+```
+1.  Select the backup number from the list.
+2.  Review the warning about the target container.
+3.  Type `RESTORE` to confirm.
 
-1. **Decompress the file**:
+### Method 2: Manual (CLI)
+If the script is unavailable, you can restore manually:
+1. **Decompress**: `gunzip -k <file>.sql.gz` (keeps the original compressed file).
+2. **Restore**:
    ```bash
-   gunzip -c pg_ativos_YYYY-MM-DD_HHMM.sql.gz > backup.sql
-   ```
-2. **Restore to Docker container**:
-   ```bash
-   cat backup.sql | docker exec -i <container_name> psql -U <user> -d <database>
+   cat <file>.sql | docker exec -i <container_id> psql -U <user> -d <database>
    ```
