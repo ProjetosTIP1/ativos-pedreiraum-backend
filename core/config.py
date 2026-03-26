@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     # Local Storage
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "images")
 
+    # Backup
+    BACKUP_DIR: str = os.getenv("BACKUP_DIR", "backups")
+
     # Application
     APP_NAME: str = os.getenv("APP_NAME", "Valemix Assets Catalog")
     ALLOWED_ORIGINS: List[str] = os.getenv("ALLOWED_ORIGINS", "*").split(",")
