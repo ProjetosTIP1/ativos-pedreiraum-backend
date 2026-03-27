@@ -33,9 +33,13 @@ COPY . .
 
 RUN uv sync --frozen
 
+# Create the images and backups directories and set permissions
+RUN mkdir -p /app/images /app/backups
+
 # Create a non-root user for security
 RUN groupadd -r appuser && useradd -m -r -g appuser appuser \
     && chown -R appuser:appuser /app
+
 USER appuser
 
 # Expose the application port
