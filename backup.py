@@ -17,6 +17,8 @@ def run_postgres_backup():
     if not CONTAINER_NAME:
         raise ValueError("POSTGRES_CONTAINER_ID not set in environment variables")
 
+    print(f"📦 Archiving postgres volume: {CONTAINER_NAME}...")
+
     # Use PGPASSWORD env var so pg_dump doesn't prompt for it
     os.environ["PGPASSWORD"] = settings.POSTGRES_PASSWORD
 
@@ -63,9 +65,31 @@ def run_postgres_backup():
             del os.environ["PGPASSWORD"]
 
 
+def backup_images_volume():
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
+    # Change 'project_images' to the actual name (usually [folder]_images)
+    SOURCE_DIR = settings.UPLOAD_DIR
+    output_filename = f"images_backup_{timestamp}.tar.gz"
+    output_path = os.path.join(settings.BACKUP_DIR, output_filename)
+
+    print(f"📦 Archiving images volume: {SOURCE_DIR}...")
+
+    # -c: create, -z: gzip, -f: file
+    # -C: Change to the directory first so the archive doesn't
+    #     contain the whole absolute path prefix.
+    cmd = ["tar", "-czf", output_path, "-C", SOURCE_DIR, "."]
+
+    try:
+        subprocess.run(cmd, check=True)
+        print(f"✅ Images backed up to: {output_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Failed to backup images: {e}")
+
+
 if __name__ == "__main__":
     try:
         run_postgres_backup()
+        backup_images_volume()
     except ValueError as e:
         print(f"❌ Error: {e}")
     except Exception as e:
