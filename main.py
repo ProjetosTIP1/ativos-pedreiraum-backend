@@ -1,7 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from core.config import settings
 from contextlib import asynccontextmanager
 from core.database import DatabaseManager
@@ -56,10 +55,6 @@ app.include_router(admin_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(image_router, prefix="/api/v1")
 app.include_router(user_router, prefix="/api/v1")
-
-
-# Mount Static Files for Image Served Locally
-app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
 
 @app.get("/")
