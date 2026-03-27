@@ -1,3 +1,4 @@
+from fastapi.openapi.models import Response
 from core.config import settings
 from fastapi.responses import FileResponse
 import mimetypes
@@ -70,6 +71,37 @@ async def upload_image(
     except Exception as e:
         print(f"Error in upload_image: {e}")
         raise HTTPException(status_code=500, detail="Failed to upload image")
+
+
+@router.patch("/set_main/{image_id}", response_model=Response)
+async def set_main_image(
+    asset_id: UUID,
+    image_id: UUID,
+    current_user: User = Depends(get_current_user),
+    service: ImageService = Depends(get_image_service),
+) -> Response:
+    """
+    Set an image as the main image for an asset.
+    """
+
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required"
+        )
+
+    try:
+        if await service.set_main_image(asset_id, image_id):
+            return Response(status_code=status.HTTP_204_NO_CONTENT)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to set main image",
+            )
+    except ServiceException as e:
+        raise to_http_exception(e)
+    except Exception as e:
+        print(f"Error in set_main_image: {e}")
+        raise HTTPException(status_code=500, detail="Failed to set main image")
 
 
 @router.get("/{filename}", response_class=FileResponse)

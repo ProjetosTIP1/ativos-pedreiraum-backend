@@ -93,6 +93,9 @@ class ImageService:
             # 4. Save file locally using aiofiles for async I/O
             # This is the last step to prevent orphaned files
             try:
+                # Ensure the directory exists
+                os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+
                 async with aiofiles.open(file_path, "wb") as out_file:
                     while content := await file.read(1024 * 1024):  # 1MB chunks
                         await out_file.write(content)

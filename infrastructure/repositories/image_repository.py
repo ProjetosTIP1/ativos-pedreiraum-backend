@@ -71,15 +71,6 @@ class SQLImageRepository(IImageRepository):
                     raise Exception("Failed to create image metadata")
                 created_image = ImageMetadata.model_validate(dict(row))
 
-                # If this is the first image, make it the main one automatically
-                count = await self.connection.fetchval(
-                    "SELECT COUNT(*) FROM image_metadata WHERE asset_id = $1",
-                    image.asset_id,
-                )
-                if count == 1:
-                    await self.set_main_image(image.asset_id, created_image.id)
-                    # Refresh to get is_main = True
-                    created_image = await self.get_by_id(created_image.id)
                 if not created_image:
                     raise Exception("Failed to refresh image metadata")
                 return created_image
