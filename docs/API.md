@@ -221,3 +221,15 @@ Retrieve the raw image file.
 
 - **Response (200 OK):** File stream.
 - **Requirements:** Public.
+
+### DELETE `/images/{image_id}`
+Delete an image by ID.
+
+- **Response (200 OK):**
+  ```json
+  {
+    "message": "Image deleted successfully"
+  }
+  ```
+- **Requirements:** Admin account only.
+
