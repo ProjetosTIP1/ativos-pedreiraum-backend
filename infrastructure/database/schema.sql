@@ -76,3 +76,5 @@ WHERE (is_main = TRUE);
 
 INSERT INTO users (email, full_name, contact, role, hashed_password)
 VALUES ('admin@pedreiraumvalemix.com.br', 'Administrador P1', '3199999999', 'ADMIN', '$pbkdf2-sha256$29000$UIrxvlcK4Ryj1PofI4SQMg$2QmlMxiEXk5PeM8aHlm2S4MaeIL2bnLrC/8jMXwb.1M');
+
+INSERT INTO categories (id, name) VALUES (1, 'CAMINHÕES'), (2, 'ESCAVADEIRAS'), (3, 'BRITADORES'), (4, 'MOTONIVELADORAS'), (5, 'PLANTA'), (6, 'PEÇAS'), (7, 'OUTROS');
