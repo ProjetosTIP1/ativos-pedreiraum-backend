@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from contextlib import asynccontextmanager
@@ -69,6 +70,9 @@ async def root():
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+app.mount("/images", StaticFiles(directory="images"), name="images")
 
 
 if __name__ == "__main__":
