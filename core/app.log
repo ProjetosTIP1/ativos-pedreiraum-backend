@@ -413,3 +413,11 @@ DETAIL:  Chave (asset_id)=(a0509995-0d73-40c9-a5e5-418f198324a8) já existe.
 2026-03-30 15:18:49 |  | ERROR  Database connection error: 500: Failed to delete image 
 2026-03-30 15:20:45 |  | ERROR  Database connection error: 500: Failed to set main image 
 2026-03-30 15:21:54 |  | ERROR  Database connection error: 500: Failed to delete image 
+2026-03-30 15:25:25 |  | ERROR  Database connection error: 500: Failed to set main image 
+2026-03-30 15:25:26 |  | ERROR  Database connection error: 500: Failed to delete image 
+2026-04-01 09:42:58 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-04-01 09:42:58 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-04-01 09:43:16 |  | ERROR  Database connection error: 401: Incorrect email or password 
+2026-04-01 09:43:26 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-04-01 09:43:26 |  | ERROR  Database connection error: 401: Could not validate credentials 
+2026-04-01 09:44:20 |  | ERROR  Database connection error: 500: Failed to set main image 

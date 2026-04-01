@@ -1,6 +1,6 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
-from api.v1.auth import get_current_admin
+from api.v1.auth import get_current_user, get_current_admin
 from api.v1.assets import get_asset_service
 from application.services.asset_service import AssetService
 from domain.entities import Asset, CreateAssetRequest, UpdateAssetRequest, User
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/admin/assets", tags=["Admin Assets"])
 @router.post("/", response_model=Asset, status_code=status.HTTP_201_CREATED)
 async def create_asset(
     asset_data: CreateAssetRequest,
-    current_user: User = Depends(get_current_admin),
+    current_user: User = Depends(get_current_user),
     service: AssetService = Depends(get_asset_service),
 ):
     try:
@@ -32,7 +32,7 @@ async def create_asset(
 async def update_asset(
     asset_id: UUID,
     asset_data: UpdateAssetRequest,
-    _current_admin: User = Depends(get_current_admin),
+    _current_user: User = Depends(get_current_user),
     service: AssetService = Depends(get_asset_service),
 ):
     try:
