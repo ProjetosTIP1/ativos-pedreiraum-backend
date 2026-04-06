@@ -27,6 +27,7 @@ class AssetCategory(str, Enum):
     GRADERS = "MOTONIVELADORAS"
     PLANT = "PLANTA"
     PARTS = "PEÇAS"
+    LOADER = "PÁ CARREGADEIRA"
     OTHER = "OUTROS"
 
 
