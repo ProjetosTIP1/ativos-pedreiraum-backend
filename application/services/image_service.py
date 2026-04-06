@@ -1,7 +1,8 @@
-from typing import List, Optional
-from uuid import UUID, uuid4
 import os
 import aiofiles
+import filetype
+from typing import List, Optional
+from uuid import UUID, uuid4
 from fastapi import UploadFile, HTTPException
 from core.config import settings
 from domain.entities import ImageMetadata
@@ -12,6 +13,16 @@ from core.helpers.exceptions_helper import (
     NotFoundServiceException,
     InfrastructureServiceException,
 )
+
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/webp", "image/avif"}
+# Maps mime types to safe extensions to avoid trusting user-provided extensions
+MIME_TO_EXT = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+    "image/avif": ".avif",
+}
 
 
 class ImageService:
@@ -34,14 +45,7 @@ class ImageService:
         Validates, saves the file locally, and stores metadata in the database.
         """
         try:
-            # 1. Validate extension
-            allowed_extensions = {".jpg", ".jpeg", ".png", ".webp"}
-            _, ext = os.path.splitext(file.filename or "")
-            ext = ext.lower()
-            if ext not in allowed_extensions:
-                raise ValidationServiceException(
-                    f"Invalid file type. Allowed: {allowed_extensions}"
-                )
+            filename = await self._validate_image_content(file)
 
             # Normalize position to match Enum
             norm_position = "OUTROS"
@@ -56,7 +60,6 @@ class ImageService:
                     norm_position = "OUTROS"
 
             # 2. Generate secure random filename
-            filename = f"{uuid4().hex}{ext}"
             file_path = os.path.join(settings.UPLOAD_DIR, filename)
 
             # 3. Determine URL and save metadata
@@ -158,3 +161,44 @@ class ImageService:
             raise
         except Exception as e:
             raise InfrastructureServiceException("Failed to delete image") from e
+
+    async def _validate_image_content(self, file: UploadFile) -> str:
+        """
+        Refactored System Design:
+        1. Size Validation (Shield)
+        2. Content Validation (Magic Numbers/Pillow)
+        3. Metadata Sanitization (Security)
+        4. Atomic Persistence (Reliability)
+        """
+
+        # --- 1. PRE-FLIGHT VALIDATION (The Guard) ---
+
+        # A. Check Size (Don't read the whole file into RAM yet)
+        file.file.seek(0, os.SEEK_END)
+        file_size = file.file.tell()
+        file.file.seek(0)
+
+        if file_size > MAX_FILE_SIZE:
+            raise ValidationServiceException(
+                f"File too large. Max allowed: {MAX_FILE_SIZE / 1e6}MB"
+            )
+
+        # B. Validate Content (Magic Numbers)
+        # Read the first 2048 bytes to detect the "real" mime type
+        header = await file.read(2048)
+        await file.seek(0)
+
+        # Use filetype to guess the mime type
+        kind = filetype.guess(header)
+
+        if kind is None:
+            raise ValidationServiceException("Cannot identify file type.")
+
+        # Validate against our allowed list
+        if kind.mime not in ALLOWED_MIME_TYPES:
+            raise ValidationServiceException(f"Unsupported file type: {kind.mime}")
+
+        # Use the extension from the verified 'kind', NOT the user's filename
+        safe_ext = f".{kind.extension}"
+        unique_name: str = f"{uuid4().hex}{safe_ext}"
+        return unique_name

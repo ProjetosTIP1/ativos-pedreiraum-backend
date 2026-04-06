@@ -10,6 +10,7 @@ dependencies = [
     "bcrypt>=5.0.0",
     "cloudinary>=1.41.0",
     "fastapi[all,standard]>=0.129.0",
+    "filetype>=1.2.0",
     "passlib[bcrypt]>=1.7.4",
     "polars>=1.38.1",
     "pydantic-settings>=2.13.1",
