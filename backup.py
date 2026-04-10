@@ -12,7 +12,7 @@ def run_postgres_backup():
     filepath = os.path.join(settings.BACKUP_DIR, filename)
 
     # In Docker, we use the container name defined in docker-compose.yml
-    CONTAINER_NAME = settings.POSTGRES_CONTAINER_ID
+    CONTAINER_NAME: str = "ativos-pg-db"
 
     if not CONTAINER_NAME:
         raise ValueError("POSTGRES_CONTAINER_ID not set in environment variables")
