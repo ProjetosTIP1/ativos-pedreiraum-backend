@@ -17,3 +17,4 @@ uploads/
 /images
 core/app.log
 /backup
+*.log
